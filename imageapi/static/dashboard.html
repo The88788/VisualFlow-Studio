@@ -1,0 +1,1323 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ImageAPI Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: #0a0a0f;
+            color: #e0e0e0;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1440px;
+            margin: 0 auto;
+        }
+
+        /* ===== Header ===== */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 28px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #1e1e2e;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .logo {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, #f472b6, #ec4899);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        h1 {
+            font-size: 22px;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .uptime-badge {
+            padding: 5px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            color: #888;
+            background: #141420;
+            border: 1px solid #1e1e2e;
+        }
+
+        .status-badge {
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .status-online {
+            background: rgba(74, 222, 128, 0.1);
+            color: #4ade80;
+            border: 1px solid rgba(74, 222, 128, 0.2);
+        }
+
+        .status-offline {
+            background: rgba(248, 113, 113, 0.1);
+            color: #f87171;
+            border: 1px solid rgba(248, 113, 113, 0.2);
+        }
+
+        /* ===== Stats Grid ===== */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .card {
+            background: #12121e;
+            border-radius: 14px;
+            padding: 22px;
+            border: 1px solid #1e1e2e;
+            transition: border-color 0.2s, transform 0.2s;
+        }
+
+        .card:hover {
+            border-color: #2a2a3e;
+            transform: translateY(-1px);
+        }
+
+        .card-title {
+            font-size: 12px;
+            color: #6b6b80;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+
+        .card-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #fff;
+            line-height: 1;
+        }
+
+        .card-subtitle {
+            font-size: 11px;
+            color: #4a4a5e;
+            margin-top: 6px;
+        }
+
+        .card.success .card-value { color: #4ade80; }
+        .card.error .card-value { color: #f87171; }
+        .card.warning .card-value { color: #fbbf24; }
+        .card.info .card-value { color: #818cf8; }
+        .card.purple .card-value { color: #a78bfa; }
+
+        /* ===== Progress Bar ===== */
+        .progress-card {
+            background: #12121e;
+            border-radius: 14px;
+            padding: 20px 24px;
+            border: 1px solid #1e1e2e;
+            margin-bottom: 28px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .progress-label {
+            font-size: 13px;
+            color: #6b6b80;
+            white-space: nowrap;
+        }
+
+        .progress-bar {
+            flex: 1;
+            height: 8px;
+            background: #1e1e2e;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4ade80, #22c55e);
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+
+        .progress-value {
+            font-size: 14px;
+            font-weight: 600;
+            color: #4ade80;
+            min-width: 50px;
+            text-align: right;
+        }
+
+        /* ===== Section Title ===== */
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 14px;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .section-count {
+            font-size: 12px;
+            color: #6b6b80;
+            font-weight: 400;
+        }
+
+        /* ===== Tables ===== */
+        .table-wrap {
+            background: #12121e;
+            border-radius: 14px;
+            border: 1px solid #1e1e2e;
+            overflow: hidden;
+            margin-bottom: 28px;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 13px 16px;
+            text-align: left;
+            border-bottom: 1px solid #1a1a2a;
+        }
+
+        .data-table th {
+            background: #161626;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            color: #6b6b80;
+            font-weight: 500;
+        }
+
+        .data-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .data-table tr:hover td {
+            background: rgba(255,255,255,0.02);
+        }
+
+        .data-table tr.inactive-row {
+            opacity: 0.55;
+        }
+
+        /* ===== Badges ===== */
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        .badge-active {
+            background: rgba(74, 222, 128, 0.12);
+            color: #4ade80;
+        }
+
+        .badge-needs_reauth, .badge-check_required, .badge-cooldown, .badge-throttled {
+            background: rgba(251, 191, 36, 0.12);
+            color: #fbbf24;
+        }
+
+        .badge-disabled, .badge-error {
+            background: rgba(248, 113, 113, 0.12);
+            color: #f87171;
+        }
+
+        .badge-free_tier, .badge-invalid_tier, .badge-low_credits {
+            background: rgba(251, 146, 60, 0.12);
+            color: #fb923c;
+        }
+
+        .badge-inactive {
+            background: rgba(251, 146, 60, 0.12);
+            color: #fb923c;
+        }
+
+        /* Task status badges */
+        .badge-success {
+            background: rgba(74, 222, 128, 0.12);
+            color: #4ade80;
+        }
+
+        .badge-processing {
+            background: rgba(129, 140, 248, 0.12);
+            color: #818cf8;
+            animation: pulse 1.5s infinite;
+        }
+
+        .badge-pending {
+            background: rgba(96, 165, 250, 0.12);
+            color: #60a5fa;
+        }
+
+        .badge-failed {
+            background: rgba(248, 113, 113, 0.12);
+            color: #f87171;
+        }
+
+        .badge-filtered {
+            background: rgba(251, 191, 36, 0.12);
+            color: #fbbf24;
+        }
+
+        .model-badge {
+            font-size: 10px;
+            padding: 2px 7px;
+            border-radius: 5px;
+            font-weight: 500;
+        }
+
+        .model-fast {
+            background: rgba(244, 114, 182, 0.15);
+            color: #f472b6;
+        }
+
+        .model-thinking {
+            background: rgba(167, 139, 250, 0.15);
+            color: #a78bfa;
+        }
+
+        /* ===== Account Info ===== */
+        .account-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .account-email {
+            font-weight: 500;
+            color: #e0e0e0;
+            font-size: 13px;
+        }
+
+        .account-remark {
+            font-size: 10px;
+            color: #4a4a5e;
+        }
+
+        .proxy-tag {
+            font-size: 10px;
+            color: #818cf8;
+            opacity: 0.7;
+        }
+
+        /* ===== Failures Indicator ===== */
+        .failures-indicator {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .failures-count {
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        .failures-count.ok { color: #4ade80; }
+        .failures-count.warning { color: #fbbf24; }
+        .failures-count.danger { color: #f87171; }
+
+        .failures-bar {
+            width: 36px;
+            height: 4px;
+            background: #1e1e2e;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .failures-bar-fill {
+            height: 100%;
+            border-radius: 2px;
+            transition: width 0.3s;
+        }
+
+        /* ===== Buttons ===== */
+        .btn {
+            padding: 6px 12px;
+            border-radius: 7px;
+            font-size: 11px;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+            transition: all 0.15s;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .btn:hover { transform: translateY(-1px); }
+        .btn:active { transform: translateY(0); }
+        .btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+        .btn-enable {
+            background: rgba(74, 222, 128, 0.1);
+            color: #4ade80;
+            border: 1px solid rgba(74, 222, 128, 0.2);
+        }
+
+        .btn-enable:hover:not(:disabled) {
+            background: rgba(74, 222, 128, 0.18);
+        }
+
+        .btn-disable {
+            background: rgba(251, 146, 60, 0.1);
+            color: #fb923c;
+            border: 1px solid rgba(251, 146, 60, 0.2);
+        }
+
+        .btn-disable:hover:not(:disabled) {
+            background: rgba(251, 146, 60, 0.18);
+        }
+
+        .btn-refresh {
+            background: rgba(129, 140, 248, 0.1);
+            color: #818cf8;
+            border: 1px solid rgba(129, 140, 248, 0.2);
+        }
+
+        .btn-refresh:hover:not(:disabled) {
+            background: rgba(129, 140, 248, 0.18);
+        }
+
+        .btn-add {
+            background: rgba(74, 222, 128, 0.1);
+            color: #4ade80;
+            border: 1px solid rgba(74, 222, 128, 0.2);
+            font-size: 13px;
+            padding: 6px 14px;
+        }
+
+        .btn-add:hover:not(:disabled) {
+            background: rgba(74, 222, 128, 0.18);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+
+        /* ===== Modal ===== */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(4px);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: #12121e;
+            border: 1px solid #2a2a3e;
+            border-radius: 16px;
+            padding: 28px;
+            width: 440px;
+            max-width: 95vw;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+        }
+
+        .modal h2 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 20px;
+        }
+
+        .modal-field {
+            margin-bottom: 14px;
+        }
+
+        .modal-field label {
+            display: block;
+            font-size: 12px;
+            color: #6b6b80;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .modal-field input {
+            width: 100%;
+            padding: 10px 14px;
+            border-radius: 8px;
+            border: 1px solid #2a2a3e;
+            background: #0a0a0f;
+            color: #e0e0e0;
+            font-size: 13px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .modal-field input:focus {
+            border-color: #f472b6;
+        }
+
+        .modal-field input::placeholder {
+            color: #3a3a4e;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+
+        .btn-cancel {
+            background: #1e1e2e;
+            color: #6b6b80;
+            border: 1px solid #2a2a3e;
+            padding: 8px 18px;
+            font-size: 13px;
+        }
+
+        .btn-cancel:hover { background: #2a2a3e; }
+
+        .btn-submit {
+            background: rgba(244, 114, 182, 0.15);
+            color: #f472b6;
+            border: 1px solid rgba(244, 114, 182, 0.3);
+            padding: 8px 18px;
+            font-size: 13px;
+        }
+
+        .btn-submit:hover:not(:disabled) { background: rgba(244, 114, 182, 0.25); }
+
+        /* Loading state for buttons */
+        .btn-loading {
+            position: relative;
+            color: transparent !important;
+        }
+
+        .btn-loading::after {
+            content: '';
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            border: 2px solid transparent;
+            border-top-color: currentColor;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+            left: 50%;
+            top: 50%;
+            margin-left: -6px;
+            margin-top: -6px;
+        }
+
+        .btn-enable.btn-loading::after { border-top-color: #4ade80; }
+        .btn-disable.btn-loading::after { border-top-color: #fb923c; }
+        .btn-refresh.btn-loading::after { border-top-color: #818cf8; }
+        .btn-auth.btn-loading::after { border-top-color: #f472b6; }
+        .btn-delete.btn-loading::after { border-top-color: #f87171; }
+
+        .btn-auth {
+            background: rgba(244, 114, 182, 0.1);
+            color: #f472b6;
+            border: 1px solid rgba(244, 114, 182, 0.2);
+        }
+        .btn-auth:hover:not(:disabled) { background: rgba(244, 114, 182, 0.18); }
+
+        .btn-delete {
+            background: rgba(248, 113, 113, 0.1);
+            color: #f87171;
+            border: 1px solid rgba(248, 113, 113, 0.2);
+        }
+        .btn-delete:hover:not(:disabled) { background: rgba(248, 113, 113, 0.18); }
+
+        /* ===== Task List ===== */
+        .task-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 18px;
+            border-bottom: 1px solid #1a1a2a;
+            gap: 12px;
+            transition: background 0.15s;
+        }
+
+        .task-item:last-child {
+            border-bottom: none;
+        }
+
+        .task-item:hover {
+            background: rgba(255,255,255,0.02);
+        }
+
+        .task-dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .task-dot.success { background: #4ade80; }
+        .task-dot.processing { background: #818cf8; animation: pulse 1.2s infinite; }
+        .task-dot.pending { background: #60a5fa; }
+        .task-dot.failed { background: #f87171; }
+        .task-dot.filtered { background: #fbbf24; }
+
+        .task-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .task-prompt {
+            font-size: 13px;
+            color: #d0d0d0;
+            white-space: normal;
+            word-wrap: break-word;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            margin-bottom: 4px;
+        }
+
+        .task-meta {
+            font-size: 11px;
+            color: #4a4a5e;
+            margin-top: 2px;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .task-right {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 2px;
+            flex-shrink: 0;
+        }
+
+        .task-time {
+            font-size: 11px;
+            color: #4a4a5e;
+        }
+
+        /* ===== Toast ===== */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .toast {
+            padding: 12px 18px;
+            border-radius: 10px;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            animation: slideIn 0.3s ease;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+            backdrop-filter: blur(10px);
+        }
+
+        .toast.success {
+            background: rgba(74, 222, 128, 0.15);
+            border: 1px solid rgba(74, 222, 128, 0.25);
+            color: #4ade80;
+        }
+
+        .toast.error {
+            background: rgba(248, 113, 113, 0.15);
+            border: 1px solid rgba(248, 113, 113, 0.25);
+            color: #f87171;
+        }
+
+        .toast.info {
+            background: rgba(129, 140, 248, 0.15);
+            border: 1px solid rgba(129, 140, 248, 0.25);
+            color: #818cf8;
+        }
+
+        /* ===== Footer ===== */
+        .footer {
+            text-align: center;
+            font-size: 11px;
+            color: #3a3a4e;
+            margin-top: 24px;
+            padding-top: 16px;
+            border-top: 1px solid #1a1a2a;
+        }
+
+        /* ===== Animations ===== */
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes slideOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
+
+        /* ===== Empty state ===== */
+        .empty-state {
+            text-align: center;
+            color: #4a4a5e;
+            padding: 32px 20px;
+            font-size: 13px;
+        }
+
+        /* ===== Responsive ===== */
+        @media (max-width: 768px) {
+            body { padding: 10px; }
+            .grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+            .card { padding: 14px; }
+            .card-value { font-size: 22px; }
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            .section-title {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+            .table-wrap {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            .data-table {
+                font-size: 12px;
+                min-width: 900px;
+            }
+            .data-table th, .data-table td {
+                padding: 10px 8px;
+                white-space: nowrap;
+            }
+            .btn {
+                padding: 5px 8px;
+                font-size: 10px;
+            }
+            .btn-group {
+                gap: 3px;
+            }
+            .btn-add {
+                padding: 5px 10px;
+                font-size: 11px;
+            }
+            .modal {
+                width: 95vw;
+                padding: 20px;
+            }
+            .progress-card {
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+            h1 { font-size: 18px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="toast-container" id="toast-container"></div>
+
+        <!-- Header -->
+        <header>
+            <div class="header-left">
+                <div class="logo">I</div>
+                <h1>ImageAPI Dashboard</h1>
+            </div>
+            <div class="header-right">
+                <span class="uptime-badge" id="uptime">⏱ —</span>
+                <span class="status-badge status-online" id="service-status">● Online</span>
+            </div>
+        </header>
+
+        <!-- Stats Cards Row 1 -->
+        <div class="grid">
+            <div class="card">
+                <div class="card-title">Total Images</div>
+                <div class="card-value" id="total-tasks">0</div>
+                <div class="card-subtitle">All time</div>
+            </div>
+
+            <div class="card success">
+                <div class="card-title">Success</div>
+                <div class="card-value" id="success-tasks">0</div>
+                <div class="card-subtitle" id="success-subtitle">0% success</div>
+            </div>
+
+            <div class="card error">
+                <div class="card-title">Failed</div>
+                <div class="card-value" id="failed-tasks">0</div>
+                <div class="card-subtitle">Errors & Filters</div>
+            </div>
+
+            <div class="card info">
+                <div class="card-title">Processing</div>
+                <div class="card-value" id="processing-tasks">0</div>
+                <div class="card-subtitle">In progress</div>
+            </div>
+
+            <div class="card purple">
+                <div class="card-title">Pending</div>
+                <div class="card-value" id="pending-tasks">0</div>
+                <div class="card-subtitle">In queue</div>
+            </div>
+        </div>
+
+        <!-- Stats Cards Row 2 -->
+        <div class="grid">
+            <div class="card success">
+                <div class="card-title">Active Accounts</div>
+                <div class="card-value" id="active-accounts">0</div>
+                <div class="card-subtitle" id="total-accounts-sub">of 0 total</div>
+            </div>
+
+            <div class="card warning">
+                <div class="card-title">Inactive</div>
+                <div class="card-value" id="inactive-accounts">0</div>
+                <div class="card-subtitle">Disabled / Reauth</div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">Memory</div>
+                <div class="card-value" id="memory-usage">0 MB</div>
+                <div class="card-subtitle">RSS</div>
+            </div>
+        </div>
+
+        <!-- Success Rate Bar -->
+        <div class="progress-card">
+            <span class="progress-label">Success Rate</span>
+            <div class="progress-bar">
+                <div class="progress-bar-fill" id="success-bar" style="width: 0%"></div>
+            </div>
+            <span class="progress-value" id="success-rate">0%</span>
+        </div>
+
+        <!-- Add Account Modal -->
+        <div class="modal-overlay" id="add-account-modal">
+            <div class="modal">
+                <h2>Add Account</h2>
+                <div class="modal-field">
+                    <label>Name</label>
+                    <input type="text" id="acc-name" placeholder="imageapi-01">
+                </div>
+                <div class="modal-field">
+                    <label>Email</label>
+                    <input type="email" id="acc-email" placeholder="user@example.com">
+                </div>
+                <div class="modal-field">
+                    <label>Password</label>
+                    <input type="text" id="acc-password" placeholder="Password">
+                </div>
+                <div class="modal-field">
+                    <label>OTP Secret (optional)</label>
+                    <input type="text" id="acc-otp" placeholder="TOTP secret key">
+                </div>
+                <div class="modal-field">
+                    <label>Proxy (optional)</label>
+                    <input type="text" id="acc-proxy" placeholder="http://user:pass@host:port">
+                </div>
+                <div class="modal-actions">
+                    <button class="btn btn-cancel" onclick="closeAddModal()">Cancel</button>
+                    <button class="btn btn-submit" id="btn-add-submit" onclick="submitAddAccount()">Add Account</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Account Management -->
+        <div class="section-title">
+            <span>Account Management <span class="section-count" id="accounts-count"></span></span>
+            <div class="btn-group">
+                <button class="btn btn-add" onclick="openAddModal()">+ Add Account</button>
+                <button class="btn btn-enable" onclick="enableAllAccounts()" id="btn-enable-all">
+                    ✓ Enable All
+                </button>
+            </div>
+        </div>
+
+        <div class="table-wrap">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Account</th>
+                        <th>Status</th>
+                        <th>Errors</th>
+                        <th>Images</th>
+                        <th>Today</th>
+                        <th>Rate</th>
+                        <th>Credits</th>
+                        <th>Proxy</th>
+                        <th>Last Used</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="accounts-body">
+                    <tr><td colspan="10" class="empty-state">Loading...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Recent Tasks -->
+        <div class="section-title">
+            <span>Recent Tasks <span class="section-count" id="tasks-count"></span></span>
+        </div>
+
+        <div class="table-wrap" id="tasks-wrap">
+            <div id="tasks-list">
+                <div class="empty-state">Loading...</div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            Auto-refresh every 3s · Last update: <span id="last-update">—</span>
+        </div>
+    </div>
+
+    <script>
+        // ===== Toast System =====
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            const icon = type === 'success' ? '✓' : type === 'error' ? '✗' : 'ℹ';
+            toast.innerHTML = `<span>${icon}</span><span>${esc(message)}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.animation = 'slideOut 0.3s ease forwards';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // ===== API Actions =====
+        let _actionInFlight = false;
+
+        async function apiAction(url, method, btnSelector, successMsg) {
+            _actionInFlight = true;
+            const btn = btnSelector ? document.querySelector(btnSelector) : null;
+            if (btn) {
+                btn.classList.add('btn-loading');
+                btn.disabled = true;
+            }
+            try {
+                const res = await fetch(url, { method });
+                const data = await res.json();
+                if (res.ok) {
+                    showToast(successMsg, 'success');
+                } else {
+                    showToast(data.error?.message || data.message || 'Request failed', 'error');
+                }
+            } catch (e) {
+                showToast('Network error', 'error');
+            } finally {
+                _actionInFlight = false;
+                fetchDashboard();
+            }
+        }
+
+        function enableAccount(email) {
+            apiAction(`/api/v1/accounts/${encodeURIComponent(email)}/activate?force=true`, 'POST', `[data-action="enable"][data-email="${email}"]`, 'Account enabled');
+        }
+
+        function disableAccount(email) {
+            apiAction(`/api/v1/accounts/${encodeURIComponent(email)}/deactivate`, 'POST', `[data-action="disable"][data-email="${email}"]`, 'Account disabled');
+        }
+
+        function refreshAccount(email) {
+            apiAction(`/api/v1/accounts/${encodeURIComponent(email)}/refresh`, 'POST', `[data-action="refresh"][data-email="${email}"]`, 'Token refreshed');
+        }
+
+        function reauthAccount(email) {
+            apiAction(`/api/v1/debug/reauth/${encodeURIComponent(email)}`, 'POST', `[data-action="reauth"][data-email="${email}"]`, 'Re-auth done');
+        }
+
+        const _authRunning = new Set();
+
+        async function authorizeAccount(email) {
+            if (_authRunning.has(email)) return;
+            _authRunning.add(email);
+            const btn = document.querySelector(`[data-action="auth"][data-email="${email}"]`);
+            if (btn) { btn.classList.add('btn-loading'); btn.disabled = true; }
+
+            try {
+                const res = await fetch(`/api/v1/accounts/${encodeURIComponent(email)}/authorize`, { method: 'POST' });
+                const data = await res.json();
+                if (res.ok && data.success) {
+                    showToast('Auth started — this may take ~60s', 'info');
+                } else {
+                    showToast(data.error?.message || 'Failed to start auth', 'error');
+                    _authRunning.delete(email);
+                    if (btn) { btn.classList.remove('btn-loading'); btn.disabled = false; }
+                }
+            } catch (e) {
+                showToast('Network error', 'error');
+                _authRunning.delete(email);
+                if (btn) { btn.classList.remove('btn-loading'); btn.disabled = false; }
+            }
+        }
+
+        async function checkAuthStatus(email, accountId) {
+            try {
+                const res = await fetch(`/api/v1/accounts/${encodeURIComponent(email)}/auth-status`);
+                const data = await res.json();
+                if (!data.running) {
+                    _authRunning.delete(email);
+                    if (data.exit_code === 0) {
+                        showToast(`Auth OK for ${email}`, 'success');
+                    } else if (data.exit_code !== null) {
+                        showToast(`Auth failed for ${email} (code ${data.exit_code})`, 'error');
+                    }
+                }
+            } catch (e) {}
+        }
+
+        async function deleteAccount(email) {
+            if (!confirm(`Delete account ${email}? This cannot be undone.`)) return;
+            _actionInFlight = true;
+            const btn = document.querySelector(`[data-action="delete"][data-email="${email}"]`);
+            if (btn) { btn.classList.add('btn-loading'); btn.disabled = true; }
+            try {
+                const res = await fetch(`/api/v1/accounts/${encodeURIComponent(email)}`, { method: 'DELETE' });
+                const data = await res.json();
+                if (res.ok && data.success) {
+                    showToast('Account deleted', 'success');
+                } else {
+                    showToast(data.error?.message || 'Delete failed', 'error');
+                }
+            } catch (e) {
+                showToast('Network error', 'error');
+            } finally {
+                _actionInFlight = false;
+                fetchDashboard();
+            }
+        }
+
+        function openAddModal() {
+            document.getElementById('add-account-modal').classList.add('active');
+            document.getElementById('acc-email').focus();
+        }
+
+        function closeAddModal() {
+            document.getElementById('add-account-modal').classList.remove('active');
+            ['acc-name', 'acc-email', 'acc-password', 'acc-otp', 'acc-proxy'].forEach(id => {
+                document.getElementById(id).value = '';
+            });
+        }
+
+        async function submitAddAccount() {
+            const name = document.getElementById('acc-name').value.trim();
+            const email = document.getElementById('acc-email').value.trim();
+            const password = document.getElementById('acc-password').value.trim();
+            const otp_secret = document.getElementById('acc-otp').value.trim();
+            const proxy = document.getElementById('acc-proxy').value.trim();
+
+            if (!name || !email || !password) {
+                showToast('Name, Email and Password are required', 'error');
+                return;
+            }
+
+            const btn = document.getElementById('btn-add-submit');
+            btn.classList.add('btn-loading');
+            btn.disabled = true;
+
+            try {
+                const res = await fetch('/api/v1/accounts/add-full', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, email, password, otp_secret, proxy }),
+                });
+                const result = await res.json();
+                if (res.ok && result.success) {
+                    showToast('Account added — click Auth to authorize', 'success');
+                    closeAddModal();
+                    fetchDashboard();
+                } else {
+                    showToast(result.error?.message || 'Failed to add account', 'error');
+                }
+            } catch (e) {
+                showToast('Network error', 'error');
+            } finally {
+                btn.classList.remove('btn-loading');
+                btn.disabled = false;
+            }
+        }
+
+        // Close modal on overlay click
+        document.getElementById('add-account-modal').addEventListener('click', function(e) {
+            if (e.target === this) closeAddModal();
+        });
+
+        async function enableAllAccounts() {
+            _actionInFlight = true;
+            const btn = document.getElementById('btn-enable-all');
+            btn.classList.add('btn-loading');
+            btn.disabled = true;
+
+            try {
+                const res = await fetch('/api/v1/accounts/activate-all?force=true', { method: 'POST' });
+                const data = await res.json();
+                if (data.activated > 0) {
+                    showToast(`Enabled ${data.activated} accounts`, 'success');
+                } else {
+                    showToast('No inactive accounts', 'info');
+                }
+            } catch (e) {
+                showToast('Network error', 'error');
+            } finally {
+                btn.classList.remove('btn-loading');
+                btn.disabled = false;
+                _actionInFlight = false;
+                fetchDashboard();
+            }
+        }
+
+        // ===== Main Fetch =====
+        async function fetchDashboard() {
+            if (_actionInFlight) return;
+            try {
+                const res = await fetch('/api/v1/dashboard/data');
+                const data = await res.json();
+                updateUI(data);
+                document.getElementById('service-status').textContent = '● Online';
+                document.getElementById('service-status').className = 'status-badge status-online';
+                // Poll auth status for in-progress auths
+                for (const email of Array.from(_authRunning)) {
+                    checkAuthStatus(email);
+                }
+            } catch (e) {
+                document.getElementById('service-status').textContent = '● Offline';
+                document.getElementById('service-status').className = 'status-badge status-offline';
+            }
+        }
+
+        // ===== UI Update =====
+        function updateUI(data) {
+            const tc = data.task_counts || {};
+
+            // Stats cards
+            document.getElementById('total-tasks').textContent = tc.total || 0;
+            document.getElementById('success-tasks').textContent = tc.success || 0;
+            document.getElementById('failed-tasks').textContent = (tc.failed || 0) + (tc.filtered || 0);
+            document.getElementById('processing-tasks').textContent = tc.processing || 0;
+            document.getElementById('pending-tasks').textContent = tc.pending || 0;
+
+            // Success rate
+            const rate = data.success_rate || 0;
+            document.getElementById('success-rate').textContent = rate + '%';
+            document.getElementById('success-bar').style.width = rate + '%';
+            document.getElementById('success-subtitle').textContent = rate + '% success';
+
+            // Accounts
+            const active = data.active_accounts || 0;
+            const total = data.total_accounts || 0;
+            document.getElementById('active-accounts').textContent = active;
+            document.getElementById('total-accounts-sub').textContent = `of ${total} total`;
+            document.getElementById('inactive-accounts').textContent = total - active;
+            document.getElementById('accounts-count').textContent = `(${total})`;
+
+            // Memory
+            document.getElementById('memory-usage').textContent = (data.memory_mb || 0) + ' MB';
+            const memCard = document.getElementById('memory-usage').closest('.card');
+            memCard.classList.remove('error', 'warning');
+            if (data.memory_mb > 2000) memCard.classList.add('error');
+            else if (data.memory_mb > 1000) memCard.classList.add('warning');
+
+            // Uptime
+            document.getElementById('uptime').textContent = '⏱ ' + (data.uptime || '—');
+
+            // Accounts table
+            const accounts = data.accounts || [];
+            const tbody = document.getElementById('accounts-body');
+
+            if (accounts.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="10" class="empty-state">No accounts</td></tr>';
+            } else {
+                tbody.innerHTML = accounts.map(acc => {
+                    const isActive = acc.is_active && acc.status === 'active';
+                    const rowClass = isActive ? '' : 'inactive-row';
+                    const statusClass = isActive ? 'active' : (acc.status || 'inactive');
+
+                    const consec = acc.consecutive_errors || 0;
+                    const maxF = 5;
+                    const pct = Math.min((consec / maxF) * 100, 100);
+                    let fClass = 'ok', fColor = '#4ade80';
+                    if (consec >= maxF) { fClass = 'danger'; fColor = '#f87171'; }
+                    else if (consec >= maxF - 2) { fClass = 'warning'; fColor = '#fbbf24'; }
+
+                    const proxyShort = acc.proxy ? acc.proxy.replace(/^https?:\/\//, '').substring(0, 20) + (acc.proxy.length > 30 ? '…' : '') : '—';
+
+                    return `
+                        <tr class="${rowClass}">
+                            <td>
+                                <div class="account-info">
+                                    <span class="account-email">${esc(acc.email)}</span>
+                                    ${acc.remark ? `<span class="account-remark">${esc(acc.remark)}</span>` : ''}
+                                </div>
+                            </td>
+                            <td><span class="badge badge-${statusClass}">${esc(acc.status)}</span></td>
+                            <td>
+                                <div class="failures-indicator">
+                                    <span class="failures-count ${fClass}">${consec}</span>
+                                    <div class="failures-bar">
+                                        <div class="failures-bar-fill" style="width:${pct}%;background:${fColor}"></div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>${acc.total_tasks || 0}</td>
+                            <td>${acc.today_count || 0}</td>
+                            <td>${acc.success_rate || 0}%</td>
+                            <td>
+                                <span class="badge ${(acc.credits !== null && acc.credits !== undefined && acc.credits < 100) ? 'badge-failed' : 'badge-active'}">${(acc.credits !== null && acc.credits !== undefined) ? acc.credits : '—'}</span>
+                            </td>
+                            <td><span class="proxy-tag" title="${esc(acc.proxy || '')}">${esc(proxyShort)}</span></td>
+                            <td style="font-size:12px;color:#4a4a5e">${acc.last_used_at ? formatDate(acc.last_used_at) : '—'}</td>
+                            <td>
+                                <div class="btn-group">
+                                    ${isActive
+                                        ? `<button class="btn btn-disable" data-action="disable" data-email="${esc(acc.email)}" onclick="disableAccount('${esc(acc.email)}')">Disable</button>`
+                                        : `<button class="btn btn-enable" data-action="enable" data-email="${esc(acc.email)}" onclick="enableAccount('${esc(acc.email)}')">Enable</button>`
+                                    }
+                                    <button class="btn btn-refresh" data-action="refresh" data-email="${esc(acc.email)}" onclick="refreshAccount('${esc(acc.email)}')">↻</button>
+                                    <button class="btn btn-auth ${_authRunning.has(acc.email) ? 'btn-loading' : ''}" data-action="auth" data-email="${esc(acc.email)}" onclick="authorizeAccount('${esc(acc.email)}')" ${_authRunning.has(acc.email) ? 'disabled' : ''}>Auth</button>
+                                    <button class="btn btn-delete" data-action="delete" data-email="${esc(acc.email)}" onclick="deleteAccount('${esc(acc.email)}')">✕</button>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+
+            // Tasks list
+            const tasks = data.recent_tasks || [];
+            const tasksList = document.getElementById('tasks-list');
+            document.getElementById('tasks-count').textContent = `(${tasks.length})`;
+
+            if (tasks.length === 0) {
+                tasksList.innerHTML = '<div class="empty-state">No tasks yet</div>';
+            } else {
+                tasksList.innerHTML = tasks.map(t => {
+                    const status = t.status || 'pending';
+                    const modelClass = t.model || 'fast';
+
+                    return `
+                        <div class="task-item">
+                            <div class="task-dot ${status}"></div>
+                            <div class="task-info">
+                                <div class="task-prompt">
+                                    <span class="model-badge model-${modelClass}">${esc(t.model || 'fast')}</span>
+                                    <span style="margin-left: 4px;">${esc(t.prompt || 'No prompt')}</span>
+                                </div>
+                                <div class="task-meta">
+                                    <span>${t.task_id ? t.task_id.substring(0, 8) + '…' : '—'}</span>
+                                    <span>${esc(t.account_email || '—')}</span>
+                                    ${t.error_message ? `<span style="color:#f87171">${esc(t.error_message.substring(0, 50))}</span>` : ''}
+                                    ${t.images_count > 0 ? `<span style="color:#4ade80">${t.images_count} img</span>` : ''}
+                                </div>
+                            </div>
+                            <div class="task-right">
+                                <span class="badge badge-${status}">${status}</span>
+                                <span class="task-time">${t.created_at ? formatDate(t.created_at) : '—'}</span>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            document.getElementById('last-update').textContent = new Date().toLocaleTimeString();
+        }
+
+        // ===== Helpers =====
+        function esc(text) {
+            if (!text) return '';
+            const d = document.createElement('div');
+            d.textContent = String(text);
+            return d.innerHTML;
+        }
+
+        function formatDate(isoStr) {
+            if (!isoStr) return '—';
+            try {
+                const d = new Date(isoStr + 'Z');
+                const pad = n => String(n).padStart(2, '0');
+                return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())} ${pad(d.getDate())}.${pad(d.getMonth()+1)}`;
+            } catch (e) {
+                return '—';
+            }
+        }
+
+        // ===== Init =====
+        fetchDashboard();
+        setInterval(fetchDashboard, 3000);
+    </script>
+</body>
+</html>

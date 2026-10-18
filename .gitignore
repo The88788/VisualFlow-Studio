@@ -1,0 +1,89 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+ENV/
+
+# Data
+data/
+*.db
+*.sqlite
+*.db-shm
+*.db-wal
+
+# Config (secrets)
+.env
+.env.*
+!.env.example
+config/setting.toml
+config/image_setting.toml
+config/auth_tokens.json
+config/image_auth_tokens.json
+config/image_accounts.json
+config/accounts.json
+accounts.json
+config/google_flow_accounts.csv
+config/proxies.csv
+
+# Browser profiles (large, per-machine)
+browser_profiles/
+gflow_profiles/
+cockpit-tools*/
+**/Default/Cookies
+**/Local State
+
+# Node
+node_modules/
+package-lock.json
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+nul
+
+# Logs
+*.log
+logs/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Temp / debug files
+C:/veoapi_tmp/
+tmp/
+*.mp4
+*.html
+!imageapi/static/dashboard.html
+!src/static/dashboard.html
+debug_*.png
+*.har
+*.trace.zip
+incidents/
+screenshots/
+playwright-report/
+test-results/
+
+# Recordings
+recordings/
+
+# Agent files
+.claude/
+.gemini/
+.codex/
+.codex-*/
+HANDOFF.md
+test_vids.py

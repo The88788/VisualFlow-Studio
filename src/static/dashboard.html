@@ -1,0 +1,2936 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VisualFlow Studio</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: #0a0a0f;
+            color: #e0e0e0;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1440px;
+            margin: 0 auto;
+        }
+
+        /* ===== Header ===== */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 28px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #1e1e2e;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .logo {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, #8b5cf6, #6366f1);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        h1 {
+            font-size: 22px;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .app-version {
+            margin-left: 7px;
+            color: #77778d;
+            font-size: 11px;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .uptime-badge {
+            padding: 5px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            color: #888;
+            background: #141420;
+            border: 1px solid #1e1e2e;
+        }
+
+        .status-badge {
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .status-online {
+            background: rgba(74, 222, 128, 0.1);
+            color: #4ade80;
+            border: 1px solid rgba(74, 222, 128, 0.2);
+        }
+
+        .status-offline {
+            background: rgba(248, 113, 113, 0.1);
+            color: #f87171;
+            border: 1px solid rgba(248, 113, 113, 0.2);
+        }
+
+        /* ===== Stats Grid ===== */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .card {
+            background: #12121e;
+            border-radius: 14px;
+            padding: 22px;
+            border: 1px solid #1e1e2e;
+            transition: border-color 0.2s, transform 0.2s;
+        }
+
+        .card:hover {
+            border-color: #2a2a3e;
+            transform: translateY(-1px);
+        }
+
+        .card-title {
+            font-size: 12px;
+            color: #6b6b80;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+
+        .card-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #fff;
+            line-height: 1;
+        }
+
+        .card-subtitle {
+            font-size: 11px;
+            color: #4a4a5e;
+            margin-top: 6px;
+        }
+
+        .card.success .card-value { color: #4ade80; }
+        .card.error .card-value { color: #f87171; }
+        .card.warning .card-value { color: #fbbf24; }
+        .card.info .card-value { color: #818cf8; }
+        .card.purple .card-value { color: #a78bfa; }
+
+        /* ===== Progress Bar ===== */
+        .progress-card {
+            background: #12121e;
+            border-radius: 14px;
+            padding: 20px 24px;
+            border: 1px solid #1e1e2e;
+            margin-bottom: 28px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .progress-label {
+            font-size: 13px;
+            color: #6b6b80;
+            white-space: nowrap;
+        }
+
+        .progress-bar {
+            flex: 1;
+            height: 8px;
+            background: #1e1e2e;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4ade80, #22c55e);
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+
+        .progress-value {
+            font-size: 14px;
+            font-weight: 600;
+            color: #4ade80;
+            min-width: 50px;
+            text-align: right;
+        }
+
+        /* ===== Section Title ===== */
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 14px;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .section-count {
+            font-size: 12px;
+            color: #6b6b80;
+            font-weight: 400;
+        }
+
+        /* ===== Tables ===== */
+        .table-wrap {
+            background: #12121e;
+            border-radius: 14px;
+            border: 1px solid #1e1e2e;
+            overflow: hidden;
+            margin-bottom: 28px;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 13px 16px;
+            text-align: left;
+            border-bottom: 1px solid #1a1a2a;
+        }
+
+        .data-table th {
+            background: #161626;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            color: #6b6b80;
+            font-weight: 500;
+        }
+
+        .data-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .data-table tr:hover td {
+            background: rgba(255,255,255,0.02);
+        }
+
+        .data-table tr.inactive-row {
+            opacity: 0.55;
+        }
+
+        /* ===== Badges ===== */
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        .badge-active {
+            background: rgba(74, 222, 128, 0.12);
+            color: #4ade80;
+        }
+
+        .badge-needs_reauth, .badge-cooldown {
+            background: rgba(251, 191, 36, 0.12);
+            color: #fbbf24;
+        }
+
+        .badge-disabled, .badge-error {
+            background: rgba(248, 113, 113, 0.12);
+            color: #f87171;
+        }
+
+        .badge-resting, .badge-throttled {
+            background: rgba(129, 140, 248, 0.12);
+            color: #818cf8;
+        }
+
+        .badge-relaxed_only {
+            background: rgba(74, 222, 128, 0.12);
+            color: #4ade80;
+        }
+
+        .badge-free_tier, .badge-invalid_tier, .badge-low_credits {
+            background: rgba(251, 146, 60, 0.12);
+            color: #fb923c;
+        }
+
+        .badge-inactive {
+            background: rgba(251, 146, 60, 0.12);
+            color: #fb923c;
+        }
+
+        /* Video status badges */
+        .badge-completed {
+            background: rgba(74, 222, 128, 0.12);
+            color: #4ade80;
+        }
+
+        .badge-generating {
+            background: rgba(129, 140, 248, 0.12);
+            color: #818cf8;
+            animation: pulse 1.5s infinite;
+        }
+
+        .badge-pending {
+            background: rgba(96, 165, 250, 0.12);
+            color: #60a5fa;
+        }
+
+        .badge-failed {
+            background: rgba(248, 113, 113, 0.12);
+            color: #f87171;
+        }
+
+        .badge-filtered {
+            background: rgba(251, 191, 36, 0.12);
+            color: #fbbf24;
+        }
+
+        .model-badge {
+            font-size: 10px;
+            padding: 2px 7px;
+            border-radius: 5px;
+            font-weight: 500;
+        }
+
+        .model-veo3 {
+            background: rgba(167, 139, 250, 0.15);
+            color: #a78bfa;
+        }
+
+        .model-veo2 {
+            background: rgba(96, 165, 250, 0.15);
+            color: #60a5fa;
+        }
+
+        .model-sora {
+            background: rgba(244, 114, 182, 0.15);
+            color: #f472b6;
+        }
+
+        .model-type-relaxed {
+            background: rgba(74, 222, 128, 0.15);
+            color: #4ade80;
+            margin-right: 4px;
+        }
+
+        .model-type-fast {
+            background: rgba(251, 146, 60, 0.15);
+            color: #fb923c;
+            margin-right: 4px;
+        }
+
+        /* ===== Account Info ===== */
+        .account-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .account-email {
+            font-weight: 500;
+            color: #e0e0e0;
+            font-size: 13px;
+        }
+
+        .account-remark {
+            font-size: 10px;
+            color: #4a4a5e;
+        }
+
+        .proxy-tag {
+            font-size: 10px;
+            color: #818cf8;
+            opacity: 0.7;
+        }
+
+        /* ===== Failures Indicator ===== */
+        .failures-indicator {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .failures-count {
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        .failures-count.ok { color: #4ade80; }
+        .failures-count.warning { color: #fbbf24; }
+        .failures-count.danger { color: #f87171; }
+
+        .failures-bar {
+            width: 36px;
+            height: 4px;
+            background: #1e1e2e;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .failures-bar-fill {
+            height: 100%;
+            border-radius: 2px;
+            transition: width 0.3s;
+        }
+
+        /* ===== Buttons ===== */
+        .btn {
+            padding: 6px 12px;
+            border-radius: 7px;
+            font-size: 11px;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+            transition: all 0.15s;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .btn:hover { transform: translateY(-1px); }
+        .btn:active { transform: translateY(0); }
+        .btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+        .btn-enable {
+            background: rgba(74, 222, 128, 0.1);
+            color: #4ade80;
+            border: 1px solid rgba(74, 222, 128, 0.2);
+        }
+
+        .btn-enable:hover:not(:disabled) {
+            background: rgba(74, 222, 128, 0.18);
+        }
+
+        .btn-disable {
+            background: rgba(251, 146, 60, 0.1);
+            color: #fb923c;
+            border: 1px solid rgba(251, 146, 60, 0.2);
+        }
+
+        .btn-disable:hover:not(:disabled) {
+            background: rgba(251, 146, 60, 0.18);
+        }
+
+        .btn-refresh {
+            background: rgba(129, 140, 248, 0.1);
+            color: #818cf8;
+            border: 1px solid rgba(129, 140, 248, 0.2);
+        }
+
+        .btn-refresh:hover:not(:disabled) {
+            background: rgba(129, 140, 248, 0.18);
+        }
+
+        .btn-danger {
+            background: rgba(248, 113, 113, 0.1);
+            color: #f87171;
+            border: 1px solid rgba(248, 113, 113, 0.2);
+        }
+
+        .btn-danger:hover:not(:disabled) {
+            background: rgba(248, 113, 113, 0.18);
+        }
+
+        .btn-auth {
+            background: rgba(167, 139, 250, 0.1);
+            color: #a78bfa;
+            border: 1px solid rgba(167, 139, 250, 0.2);
+        }
+
+        .btn-auth:hover:not(:disabled) {
+            background: rgba(167, 139, 250, 0.18);
+        }
+
+        .btn-auth.btn-loading::after { border-top-color: #a78bfa; }
+        .btn-danger.btn-loading::after { border-top-color: #f87171; }
+
+        .btn-add {
+            background: rgba(74, 222, 128, 0.1);
+            color: #4ade80;
+            border: 1px solid rgba(74, 222, 128, 0.2);
+            font-size: 13px;
+            padding: 6px 14px;
+        }
+
+        .btn-add:hover:not(:disabled) {
+            background: rgba(74, 222, 128, 0.18);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+
+        /* ===== Modal ===== */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(4px);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: #12121e;
+            border: 1px solid #2a2a3e;
+            border-radius: 16px;
+            padding: 28px;
+            width: 440px;
+            max-width: 95vw;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+        }
+
+        .modal h2 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 20px;
+        }
+
+        .modal-field {
+            margin-bottom: 14px;
+        }
+
+        .modal-field label {
+            display: block;
+            font-size: 12px;
+            color: #6b6b80;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .modal-field input {
+            width: 100%;
+            padding: 10px 14px;
+            border-radius: 8px;
+            border: 1px solid #2a2a3e;
+            background: #0a0a0f;
+            color: #e0e0e0;
+            font-size: 13px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .modal-field input:focus {
+            border-color: #4ade80;
+        }
+
+        .modal-field input::placeholder {
+            color: #3a3a4e;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+
+        .btn-cancel {
+            background: #1e1e2e;
+            color: #6b6b80;
+            border: 1px solid #2a2a3e;
+            padding: 8px 18px;
+            font-size: 13px;
+        }
+
+        .btn-cancel:hover { background: #2a2a3e; }
+
+        /* ===== Modal Tabs ===== */
+        .modal-tabs {
+            display: flex;
+            gap: 0;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #2a2a3e;
+        }
+
+        .modal-tab {
+            background: none;
+            border: none;
+            border-bottom: 2px solid transparent;
+            color: #6b6b80;
+            font-size: 13px;
+            font-weight: 500;
+            padding: 8px 16px 10px;
+            cursor: pointer;
+            margin-bottom: -1px;
+            transition: color 0.15s, border-color 0.15s;
+            border-radius: 0;
+        }
+
+        .modal-tab:hover { color: #c0c0d0; }
+
+        .modal-tab.active {
+            color: #4ade80;
+            border-bottom-color: #4ade80;
+        }
+
+        .btn-submit {
+            background: rgba(74, 222, 128, 0.15);
+            color: #4ade80;
+            border: 1px solid rgba(74, 222, 128, 0.3);
+            padding: 8px 18px;
+            font-size: 13px;
+        }
+
+        .btn-submit:hover:not(:disabled) { background: rgba(74, 222, 128, 0.25); }
+
+        /* Loading state for buttons */
+        .btn-loading {
+            position: relative;
+            color: transparent !important;
+        }
+
+        .btn-loading::after {
+            content: '';
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            border: 2px solid transparent;
+            border-top-color: currentColor;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+            left: 50%;
+            top: 50%;
+            margin-left: -6px;
+            margin-top: -6px;
+        }
+
+        .btn-enable.btn-loading::after { border-top-color: #4ade80; }
+        .btn-disable.btn-loading::after { border-top-color: #fb923c; }
+        .btn-refresh.btn-loading::after { border-top-color: #818cf8; }
+
+        /* ===== Video List ===== */
+        .video-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 18px;
+            border-bottom: 1px solid #1a1a2a;
+            gap: 12px;
+            transition: background 0.15s;
+        }
+
+        .video-item:last-child {
+            border-bottom: none;
+        }
+
+        .video-item:hover {
+            background: rgba(255,255,255,0.02);
+        }
+
+        .video-dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .video-dot.completed { background: #4ade80; }
+        .video-dot.generating { background: #818cf8; animation: pulse 1.2s infinite; }
+        .video-dot.pending { background: #60a5fa; }
+        .video-dot.failed { background: #f87171; }
+        .video-dot.filtered { background: #fbbf24; }
+        .video-dot.upscaling { background: #a78bfa; animation: pulse 1.4s infinite; }
+
+        .video-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .video-prompt {
+            font-size: 13px;
+            color: #d0d0d0;
+            white-space: normal; /* Fix for mobile so long text wraps */
+            word-wrap: break-word; /* Ensure it breaks on long continuous words */
+            display: -webkit-box;
+            -webkit-line-clamp: 2; /* Only show 2 lines to save vertical space */
+            line-clamp: 2; /* Standard property for cross-browser support */
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            margin-bottom: 4px;
+        }
+
+        .video-meta {
+            font-size: 11px;
+            color: #4a4a5e;
+            margin-top: 2px;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .video-right {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 2px;
+            flex-shrink: 0;
+        }
+
+        .video-time {
+            font-size: 11px;
+            color: #4a4a5e;
+        }
+
+        /* ===== Generation workspace ===== */
+        .generation-workspace {
+            margin: 22px 0;
+            padding: 22px;
+            border: 1px solid #26263a;
+            border-radius: 16px;
+            background: linear-gradient(145deg, #151522, #101018);
+            box-shadow: 0 18px 50px rgba(0, 0, 0, 0.18);
+        }
+
+        .generation-heading {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .generation-heading h2 {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .generation-tabs {
+            display: inline-flex;
+            gap: 4px;
+            padding: 4px;
+            margin: 0;
+            border: 1px solid #29293d;
+            border-radius: 11px;
+            background: #0b0b12;
+        }
+
+        .generation-tab {
+            padding: 8px 16px;
+            border: 0;
+            border-radius: 8px;
+            background: transparent;
+            color: #85859a;
+            font: inherit;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .generation-tab.active {
+            background: #292943;
+            color: #f4f4f8;
+        }
+
+        .provider-pill {
+            padding: 6px 10px;
+            border-radius: 999px;
+            border: 1px solid rgba(74, 222, 128, 0.25);
+            background: rgba(74, 222, 128, 0.1);
+            color: #4ade80;
+            font-size: 12px;
+        }
+
+        .provider-pill.not-ready {
+            border-color: rgba(248, 113, 113, 0.3);
+            background: rgba(248, 113, 113, 0.1);
+            color: #f87171;
+        }
+
+        .prompt-input {
+            width: 100%;
+            min-height: 130px;
+            resize: vertical;
+            padding: 15px 16px;
+            border: 1px solid #303046;
+            border-radius: 12px;
+            background: #0b0b12;
+            color: #f1f1f5;
+            font: inherit;
+            font-size: 14px;
+            line-height: 1.55;
+            outline: none;
+        }
+
+        .prompt-input:focus,
+        .generation-select:focus {
+            border-color: #818cf8;
+            box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.12);
+        }
+
+        .generation-options {
+            display: grid;
+            grid-template-columns: minmax(180px, 1fr) minmax(150px, .65fr) minmax(120px, .45fr) auto;
+            gap: 12px;
+            align-items: end;
+            margin: 0;
+        }
+
+        .generation-options[hidden] { display: none; }
+
+        .generation-field label {
+            display: block;
+            margin-bottom: 7px;
+            color: #88889b;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: .05em;
+        }
+
+        .generation-select,
+        .duration-display {
+            width: 100%;
+            min-height: 42px;
+            padding: 10px 12px;
+            border: 1px solid #303046;
+            border-radius: 10px;
+            background: #0b0b12;
+            color: #e8e8ef;
+            font-size: 13px;
+            outline: none;
+        }
+
+        .duration-display {
+            display: flex;
+            align-items: center;
+            color: #a9a9b8;
+        }
+
+        .generate-button {
+            min-height: 42px;
+            padding: 10px 22px;
+            border: 0;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .generate-button:hover:not(:disabled) { filter: brightness(1.1); }
+        .generate-button:disabled { opacity: .5; cursor: not-allowed; }
+
+        .generation-note {
+            margin-top: 11px;
+            color: #626276;
+            font-size: 12px;
+        }
+
+        .generation-toolbar {
+            display: flex;
+            align-items: flex-end;
+            gap: 14px;
+            margin-bottom: 14px;
+        }
+
+        .generation-toolbar .generation-options {
+            flex: 1;
+        }
+
+        .prompt-composer {
+            display: flex;
+            align-items: stretch;
+            gap: 10px;
+        }
+
+        .prompt-composer .prompt-input { flex: 1; }
+
+        .refinement-source {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+            padding: 10px 12px;
+            border: 1px solid rgba(129,140,248,.35);
+            border-radius: 12px;
+            background: rgba(129,140,248,.09);
+        }
+        .refinement-source[hidden] { display: none; }
+        .refinement-source img {
+            width: 70px;
+            height: 70px;
+            flex: 0 0 70px;
+            border-radius: 9px;
+            object-fit: cover;
+            cursor: zoom-in;
+        }
+        .refinement-source-copy { flex: 1; min-width: 0; }
+        .refinement-source-copy strong { display: block; color: #c7c7ff; }
+        .refinement-source-copy span { display: block; margin-top: 4px; color: #85859b; font-size: 12px; }
+        .refinement-cancel {
+            border: 1px solid #41415a;
+            border-radius: 8px;
+            padding: 7px 10px;
+            background: #171724;
+            color: #c8c8d7;
+            cursor: pointer;
+        }
+
+        .reference-upload-button {
+            width: 112px;
+            min-height: 130px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            border: 1px dashed #464665;
+            border-radius: 12px;
+            background: #11111c;
+            color: #b8b8cb;
+            font-size: 12px;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .reference-upload-button:hover { border-color: #818cf8; color: #fff; }
+        .reference-upload-button strong { font-size: 24px; color: #a5b4fc; }
+
+        .reference-strip {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .reference-strip[hidden] { display: none; }
+        .reference-viewport { flex: 1; overflow: hidden; }
+        .reference-track { display: flex; gap: 10px; transition: transform .22s ease; }
+
+        .reference-thumb {
+            position: relative;
+            flex: 0 0 calc((100% - 20px) / 3);
+            height: 112px;
+            overflow: hidden;
+            border: 1px solid #303047;
+            border-radius: 10px;
+            background: #09090e;
+            cursor: zoom-in;
+        }
+
+        .reference-thumb img { width: 100%; height: 100%; object-fit: cover; }
+        .reference-thumb .remove-reference {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            width: 26px;
+            height: 26px;
+            border: 0;
+            border-radius: 50%;
+            background: rgba(0,0,0,.72);
+            color: #fff;
+            cursor: pointer;
+        }
+
+        .slider-arrow {
+            width: 34px;
+            height: 34px;
+            flex: 0 0 34px;
+            border: 1px solid #35354b;
+            border-radius: 50%;
+            background: #171724;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        .slider-arrow:disabled { opacity: .25; cursor: default; }
+
+        .image-lightbox {
+            position: fixed;
+            inset: 0;
+            z-index: 5000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 54px 72px 86px;
+            background: rgba(2, 2, 8, .82);
+            backdrop-filter: blur(4px);
+        }
+
+        .image-lightbox[hidden] { display: none; }
+        .lightbox-image { max-width: 88vw; max-height: 76vh; object-fit: contain; border-radius: 12px; box-shadow: 0 24px 80px #000; }
+        .lightbox-close { position: absolute; top: 20px; right: 24px; }
+        .lightbox-prev { position: absolute; left: 24px; }
+        .lightbox-next { position: absolute; right: 24px; }
+        .lightbox-actions { position: absolute; bottom: 24px; display: flex; gap: 10px; align-items: center; }
+        .delete-image-button { border-color: rgba(248,113,113,.35); background: rgba(248,113,113,.12); color: #fca5a5; cursor: pointer; }
+
+        .image-results img { cursor: zoom-in; }
+
+        @media (max-width: 820px) {
+            .generation-toolbar { align-items: stretch; flex-direction: column; }
+            .generation-options { grid-template-columns: 1fr 1fr; }
+            .prompt-composer { flex-direction: column; }
+            .reference-upload-button { width: 100%; min-height: 58px; flex-direction: row; }
+            .image-lightbox { padding: 60px 44px 90px; }
+        }
+
+        .generation-last-request {
+            margin-top: 10px;
+            padding: 10px 12px;
+            border: 1px solid rgba(129,140,248,.25);
+            border-radius: 9px;
+            background: rgba(129,140,248,.08);
+            color: #c7d2fe;
+            font-size: 13px;
+            line-height: 1.45;
+        }
+        .generation-last-request.is-pending { color: #fde68a; border-color: rgba(245,158,11,.32); background: rgba(245,158,11,.08); }
+        .generation-last-request.is-success { color: #86efac; border-color: rgba(34,197,94,.32); background: rgba(34,197,94,.08); }
+        .generation-last-request.is-error { color: #fca5a5; border-color: rgba(248,113,113,.35); background: rgba(248,113,113,.09); }
+
+        .image-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 14px;
+        }
+
+        .image-task-card {
+            overflow: hidden;
+            border: 1px solid #26263a;
+            border-radius: 14px;
+            background: #11111a;
+        }
+
+        .image-results {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 2px;
+            min-height: 150px;
+            background: #09090e;
+        }
+
+        .image-results.single { grid-template-columns: 1fr; }
+
+        .image-results img {
+            display: block;
+            width: 100%;
+            height: 210px;
+            object-fit: cover;
+            background: #09090e;
+        }
+
+        .image-placeholder {
+            display: flex;
+            min-height: 180px;
+            align-items: center;
+            justify-content: center;
+            color: #737389;
+            text-align: center;
+            padding: 22px;
+        }
+
+        .image-task-body { padding: 13px; }
+
+        .image-task-prompt {
+            min-height: 38px;
+            margin-bottom: 9px;
+            color: #e2e2e9;
+            font-size: 13px;
+            line-height: 1.45;
+        }
+
+        .prompt-details { margin-bottom: 9px; color: #e2e2e9; font-size: 13px; }
+        .prompt-details summary {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 10px;
+            cursor: pointer;
+            color: #d8d8e4;
+            line-height: 1.45;
+        }
+        .prompt-preview { overflow-wrap: anywhere; }
+        .prompt-full {
+            margin-top: 9px;
+            padding: 10px 12px;
+            border: 1px solid #2a2a3e;
+            border-radius: 9px;
+            background: #0b0b13;
+            line-height: 1.5;
+            overflow-wrap: anywhere;
+            white-space: pre-wrap;
+        }
+        .copy-prompt-button {
+            flex: 0 0 auto;
+            padding: 5px 9px;
+            border: 1px solid rgba(129,140,248,.35);
+            border-radius: 7px;
+            background: rgba(129,140,248,.12);
+            color: #a5b4fc;
+            cursor: pointer;
+            font-size: 11px;
+        }
+
+        .image-task-meta,
+        .image-downloads {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 7px;
+        }
+
+        .image-task-meta { color: #68687c; font-size: 11px; }
+        .image-downloads { margin-top: 11px; }
+        .image-downloads .error-summary,
+        .image-downloads .error-details { flex-basis: 100%; }
+
+        .video-actions {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 8px;
+        }
+
+        .download-button {
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 10px;
+            border: 1px solid rgba(74, 222, 128, .25);
+            border-radius: 8px;
+            background: rgba(74, 222, 128, .1);
+            color: #4ade80;
+            text-decoration: none;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .download-button:disabled { opacity: .55; cursor: wait; }
+
+        .video-error-detail {
+            margin-top: 4px;
+            color: #f87171;
+            font-size: 11px;
+        }
+
+        .error-summary {
+            margin-top: 8px;
+            color: #fca5a5;
+            font-size: 13px;
+        }
+
+        .error-details {
+            margin-top: 6px;
+            color: #71718a;
+            font-size: 11px;
+        }
+
+        .error-details summary {
+            cursor: pointer;
+            color: #a5a5bd;
+        }
+
+        .error-details pre {
+            margin: 6px 0 0;
+            padding: 8px;
+            max-height: 180px;
+            overflow: auto;
+            white-space: pre-wrap;
+            word-break: break-word;
+            border-radius: 8px;
+            background: #090910;
+        }
+
+        .error-details-actions {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 7px;
+        }
+
+        .copy-error-button {
+            padding: 5px 9px;
+            border: 1px solid #35354b;
+            border-radius: 7px;
+            background: #171724;
+            color: #c7c7d8;
+            font: inherit;
+            font-size: 11px;
+            cursor: pointer;
+        }
+
+        .copy-error-button:hover { color: #fff; border-color: #6366f1; }
+
+        /* ===== Toast ===== */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 3000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .toast {
+            padding: 12px 18px;
+            border-radius: 10px;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            animation: slideIn 0.3s ease;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+            backdrop-filter: blur(10px);
+        }
+
+        .toast.success {
+            background: rgba(74, 222, 128, 0.15);
+            border: 1px solid rgba(74, 222, 128, 0.25);
+            color: #4ade80;
+        }
+
+        .toast.error {
+            background: rgba(248, 113, 113, 0.15);
+            border: 1px solid rgba(248, 113, 113, 0.25);
+            color: #f87171;
+        }
+
+        .toast.info {
+            background: rgba(129, 140, 248, 0.15);
+            border: 1px solid rgba(129, 140, 248, 0.25);
+            color: #818cf8;
+        }
+
+        /* ===== Footer ===== */
+        .footer {
+            text-align: center;
+            font-size: 11px;
+            color: #3a3a4e;
+            margin-top: 24px;
+            padding-top: 16px;
+            border-top: 1px solid #1a1a2a;
+        }
+
+        /* ===== Animations ===== */
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes slideOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
+
+        /* ===== Empty state ===== */
+        .empty-state {
+            text-align: center;
+            color: #4a4a5e;
+            padding: 32px 20px;
+            font-size: 13px;
+        }
+
+        /* ===== Responsive ===== */
+        @media (max-width: 768px) {
+            body { padding: 10px; }
+            .grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+            .card { padding: 14px; }
+            .card-value { font-size: 22px; }
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            .section-title {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+            .table-wrap {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            .data-table {
+                font-size: 12px;
+                min-width: 900px;
+            }
+            .data-table th, .data-table td {
+                padding: 10px 8px;
+                white-space: nowrap;
+            }
+            .btn {
+                padding: 5px 8px;
+                font-size: 10px;
+            }
+            .btn-group {
+                gap: 3px;
+            }
+            .btn-add {
+                padding: 5px 10px;
+                font-size: 11px;
+            }
+            .modal {
+                width: 95vw;
+                padding: 20px;
+            }
+            .progress-card {
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+            .generation-options {
+                grid-template-columns: 1fr 1fr;
+            }
+            .generate-button { width: 100%; }
+        }
+
+        @media (max-width: 480px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+            h1 { font-size: 18px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="toast-container" id="toast-container"></div>
+
+        <!-- Header -->
+        <header>
+            <div class="header-left">
+                <div class="logo">V</div>
+                <h1>VisualFlow Studio <small class="app-version">v__VISUALFLOW_VERSION__</small></h1>
+            </div>
+            <div class="header-right">
+                <span class="uptime-badge" id="uptime">⏱ —</span>
+                <span class="status-badge status-online" id="service-status">● Online</span>
+            </div>
+        </header>
+
+        <div class="section-title"><span>Изображения</span></div>
+        <div class="grid">
+            <div class="card">
+                <div class="card-title">Всего заданий</div>
+                <div class="card-value" id="total-images">0</div>
+                <div class="card-subtitle">Заданий за всё время</div>
+            </div>
+
+            <div class="card success">
+                <div class="card-title">Готово</div>
+                <div class="card-value" id="completed-images">0</div>
+                <div class="card-subtitle">Можно скачать</div>
+            </div>
+
+            <div class="card error">
+                <div class="card-title">Ошибки</div>
+                <div class="card-value" id="failed-images">0</div>
+                <div class="card-subtitle">Не выполнено</div>
+            </div>
+
+            <div class="card info">
+                <div class="card-title">Генерируется</div>
+                <div class="card-value" id="generating-images">0</div>
+                <div class="card-subtitle">В работе</div>
+            </div>
+
+            <div class="card purple">
+                <div class="card-title">Ожидает</div>
+                <div class="card-value" id="pending-images">0</div>
+                <div class="card-subtitle">В очереди</div>
+            </div>
+        </div>
+
+        <div class="section-title"><span>Видео</span></div>
+        <div class="grid">
+            <div class="card"><div class="card-title">Всего видео</div><div class="card-value" id="total-videos">0</div><div class="card-subtitle">За всё время</div></div>
+            <div class="card success"><div class="card-title">Готово</div><div class="card-value" id="completed-videos">0</div><div class="card-subtitle" id="success-subtitle">0% success</div></div>
+            <div class="card error"><div class="card-title">Ошибки</div><div class="card-value" id="failed-videos">0</div><div class="card-subtitle">Не выполнено</div></div>
+            <div class="card info"><div class="card-title">Генерируется</div><div class="card-value" id="generating-videos">0</div><div class="card-subtitle">В работе</div></div>
+            <div class="card purple"><div class="card-title">Ожидает</div><div class="card-value" id="pending-videos">0</div><div class="card-subtitle">В очереди</div></div>
+        </div>
+
+        <!-- Stats Cards Row 2 -->
+        <div class="grid" id="legacy-account-stats">
+            <div class="card success">
+                <div class="card-title">Active Accounts</div>
+                <div class="card-value" id="active-accounts">0</div>
+                <div class="card-subtitle" id="total-accounts-sub">of 0 total</div>
+            </div>
+
+            <div class="card warning">
+                <div class="card-title">Inactive</div>
+                <div class="card-value" id="inactive-accounts">0</div>
+                <div class="card-subtitle">Disabled / Reauth</div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">Memory</div>
+                <div class="card-value" id="memory-usage">0 MB</div>
+                <div class="card-subtitle">RSS</div>
+            </div>
+        </div>
+
+        <!-- Success Rate Bar -->
+        <div class="progress-card">
+            <span class="progress-label">Success Rate</span>
+            <div class="progress-bar">
+                <div class="progress-bar-fill" id="success-bar" style="width: 0%"></div>
+            </div>
+            <span class="progress-value" id="success-rate">0%</span>
+        </div>
+
+        <!-- Google Flow generation workspace -->
+        <form class="generation-workspace" id="generation-form" onsubmit="submitGeneration(event)">
+            <div class="generation-heading">
+                <h2 id="generation-title">Создать изображения</h2>
+                <span class="provider-pill" id="provider-pill">Проверка Flow…</span>
+            </div>
+            <div class="generation-toolbar">
+                <div class="generation-tabs">
+                    <button class="generation-tab active" id="generation-tab-image" type="button" onclick="switchGenerationKind('image')">Изображения</button>
+                    <button class="generation-tab" id="generation-tab-video" type="button" onclick="switchGenerationKind('video')">Видео</button>
+                </div>
+                <div class="generation-options" id="image-generation-options">
+                    <div class="generation-field">
+                        <label for="image-generation-model">Модель</label>
+                        <select class="generation-select" id="image-generation-model">
+                            <option value="nano2">Nano Banana 2</option>
+                            <option value="nano-pro">Nano Banana Pro</option>
+                            <option value="image4">Image 4</option>
+                            <option value="imagen4">Imagen 4</option>
+                        </select>
+                    </div>
+                    <div class="generation-field">
+                        <label for="image-generation-aspect">Формат</label>
+                        <select class="generation-select" id="image-generation-aspect">
+                            <option value="1:1">1:1 — квадрат</option>
+                            <option value="16:9">16:9 — горизонтальный</option>
+                            <option value="9:16">9:16 — вертикальный</option>
+                            <option value="4:3">4:3</option>
+                            <option value="3:4">3:4</option>
+                        </select>
+                    </div>
+                    <div class="generation-field">
+                        <label for="image-generation-count">Количество</label>
+                        <select class="generation-select" id="image-generation-count">
+                            <option value="1">1 изображение</option>
+                            <option value="2">2 изображения</option>
+                            <option value="3">3 изображения</option>
+                            <option value="4">4 изображения</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="generation-options" id="video-generation-options" hidden>
+                    <div class="generation-field"><label for="generation-model">Модель</label><select class="generation-select" id="generation-model"><option value="veo31_fast">Veo 3.1 — Fast</option><option value="veo31_pro">Veo 3.1 — Quality</option><option value="omni_flash">Omni Flash</option></select></div>
+                    <div class="generation-field"><label for="generation-orientation">Формат</label><select class="generation-select" id="generation-orientation"><option value="landscape">16:9 — горизонтальный</option><option value="portrait">9:16 — вертикальный</option></select></div>
+                    <div class="generation-field"><label>Длительность</label><div class="duration-display">8 секунд</div></div>
+                </div>
+            </div>
+            <div class="refinement-source" id="refinement-source" hidden>
+                <img id="refinement-source-image" alt="Изображение для доработки" onclick="openRefinementSource()">
+                <div class="refinement-source-copy">
+                    <strong id="refinement-source-title">Доработка изображения</strong>
+                    <span>Оригинал сохранится. Результат будет добавлен как новая версия.</span>
+                </div>
+                <button class="refinement-cancel" type="button" onclick="cancelRefinement()">Отменить</button>
+            </div>
+            <div class="prompt-composer">
+                <textarea class="prompt-input" id="generation-prompt" maxlength="8000" required placeholder="Опишите изображение, композицию, освещение и желаемый стиль…"></textarea>
+                <label class="reference-upload-button" id="reference-upload-button" for="reference-files"><strong>＋</strong><span>Добавить<br>референсы</span></label>
+                <input id="reference-files" type="file" accept="image/png,image/jpeg,image/webp" multiple hidden onchange="addReferenceFiles(this.files)">
+            </div>
+            <div class="reference-strip" id="reference-strip" hidden>
+                <button class="slider-arrow" id="reference-prev" type="button" onclick="moveReferenceSlider(-1)">‹</button>
+                <div class="reference-viewport"><div class="reference-track" id="reference-track"></div></div>
+                <button class="slider-arrow" id="reference-next" type="button" onclick="moveReferenceSlider(1)">›</button>
+            </div>
+            <button class="generate-button" id="generation-submit" type="submit" style="margin-top:14px">Создать изображения</button>
+            <div class="generation-last-request" id="generation-last-request" role="status" aria-live="polite" hidden></div>
+        </form>
+
+        <div class="image-lightbox" id="image-lightbox" hidden onclick="lightboxBackdrop(event)">
+            <button class="slider-arrow lightbox-close" type="button" aria-label="Закрыть" onclick="closeLightbox()">×</button>
+            <button class="slider-arrow lightbox-prev" id="lightbox-prev" type="button" onclick="moveLightbox(-1)">‹</button>
+            <img class="lightbox-image" id="lightbox-image" alt="Просмотр изображения">
+            <button class="slider-arrow lightbox-next" id="lightbox-next" type="button" onclick="moveLightbox(1)">›</button>
+            <div class="lightbox-actions">
+                <a class="download-button" id="lightbox-download" download>Скачать оригинал</a>
+                <a class="download-button" id="lightbox-upscale-download" download hidden>Скачать 2K</a>
+                <button class="download-button" id="lightbox-upscale-start" type="button" onclick="requestLightboxUpscale()" hidden>Подготовить 2K</button>
+                <button class="download-button" id="lightbox-refine" type="button" onclick="refineLightboxItem()" hidden>Доработать</button>
+                <button class="download-button delete-image-button" id="lightbox-delete" type="button" onclick="deleteLightboxItem()">Удалить</button>
+            </div>
+        </div>
+
+        <!-- Add Account Modal -->
+        <div class="modal-overlay" id="add-account-modal">
+            <div class="modal">
+                <h2>Add Account</h2>
+
+                <!-- Tab navigation -->
+                <div class="modal-tabs">
+                    <button class="modal-tab active" id="tab-login" onclick="switchAddTab('login')">Login / Password</button>
+                    <button class="modal-tab" id="tab-oauth" onclick="switchAddTab('oauth')">OAuth Token</button>
+                </div>
+
+                <!-- Tab 1: Login / Password -->
+                <div id="add-tab-login">
+                    <div class="modal-field">
+                        <label>Name</label>
+                        <input type="text" id="acc-name" placeholder="veo-100">
+                    </div>
+                    <div class="modal-field">
+                        <label>Email</label>
+                        <input type="email" id="acc-email" placeholder="user@example.com">
+                    </div>
+                    <div class="modal-field">
+                        <label>Password</label>
+                        <input type="text" id="acc-password" placeholder="Password">
+                    </div>
+                    <div class="modal-field">
+                        <label>OTP Secret (optional)</label>
+                        <input type="text" id="acc-otp" placeholder="TOTP secret key">
+                    </div>
+                    <div class="modal-field">
+                        <label>Proxy Type</label>
+                        <div style="display:flex;gap:18px;margin-top:4px">
+                            <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-weight:normal">
+                                <input type="radio" name="acc-proxy-type" value="datacenter" checked onchange="onAccProxyTypeChange()">
+                                Datacenter
+                            </label>
+                            <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-weight:normal">
+                                <input type="radio" name="acc-proxy-type" value="residential" onchange="onAccProxyTypeChange()">
+                                Residential
+                            </label>
+                        </div>
+                    </div>
+                    <div class="modal-field" id="acc-proxy-dc-field">
+                        <label>Datacenter Proxy (optional)</label>
+                        <select id="acc-proxy-select" onchange="onAccProxySelectChange()" style="width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid #2a2a3e; background: #0a0a0f; color: #e0e0e0; font-size: 13px; outline: none; margin-bottom: 8px;">
+                            <option value="">-- No Proxy / Auto-assign --</option>
+                            <option value="custom">Enter Manually...</option>
+                        </select>
+                        <input type="text" id="acc-proxy" placeholder="http://user:pass@host:port" style="display:none">
+                    </div>
+                    <div class="modal-field" id="acc-proxy-rp-field" style="display:none">
+                        <label>Residential Proxy</label>
+                        <input type="text" id="acc-residential-proxy" placeholder="http://host:port:user:pass  or  http://user:pass@host:port">
+                    </div>
+                </div>
+
+                <!-- Tab 2: OAuth Token -->
+                <div id="add-tab-oauth" style="display:none">
+                    <div class="modal-field">
+                        <label>Email</label>
+                        <input type="email" id="rt-email" placeholder="user@example.com">
+                    </div>
+                    <div class="modal-field">
+                        <label>Refresh Token</label>
+                        <input type="text" id="rt-refresh-token" placeholder="1//0e...">
+                    </div>
+                    <div class="modal-field">
+                        <label>Proxy (optional)</label>
+                        <select id="rt-proxy-select" onchange="onRtProxySelectChange()" style="width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid #2a2a3e; background: #0a0a0f; color: #e0e0e0; font-size: 13px; outline: none; margin-bottom: 8px;">
+                            <option value="">-- No Proxy / Auto-assign --</option>
+                            <option value="custom">Enter Manually...</option>
+                        </select>
+                        <input type="text" id="rt-proxy" placeholder="http://user:pass@host:port" style="display:none">
+                    </div>
+                    <div class="modal-field">
+                        <label>Remark (optional)</label>
+                        <input type="text" id="rt-remark" placeholder="cockpit account">
+                    </div>
+                </div>
+
+                <div class="modal-actions">
+                    <button class="btn btn-cancel" onclick="closeAddModal()">Cancel</button>
+                    <button class="btn btn-submit" id="btn-add-submit" onclick="submitAddAccount()">Add Account</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Proxy Modal -->
+        <div class="modal-overlay" id="proxy-modal">
+            <div class="modal">
+                <h2 id="proxy-modal-title">Add Proxy</h2>
+                <div class="modal-field">
+                    <label>Account</label>
+                    <select id="proxy-account-id" style="width:100%;padding:10px 14px;border-radius:8px;border:1px solid #2a2a3e;background:#0a0a0f;color:#e0e0e0;font-size:13px;outline:none;"></select>
+                </div>
+                <div class="modal-field">
+                    <label>Proxy URL</label>
+                    <input type="text" id="proxy-url-input" placeholder="http://user:pass@host:port">
+                </div>
+                <div class="modal-actions">
+                    <button class="btn btn-cancel" onclick="closeProxyModal()">Cancel</button>
+                    <button class="btn btn-submit" id="btn-proxy-save" onclick="saveProxy()">Save</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Generation Controls -->
+        <div class="section-title" id="legacy-generation-controls">
+            <span>Generation Controls</span>
+            <div class="btn-group">
+                <button class="btn" id="btn-relaxed-toggle" onclick="toggleRelaxedMode()" style="min-width:160px">
+                    ⏳ Loading...
+                </button>
+            </div>
+        </div>
+
+        <!-- Account Management -->
+        <div class="section-title" id="legacy-account-management">
+            <span>Account Management <span class="section-count" id="accounts-count"></span></span>
+            <div class="btn-group">
+                <button class="btn btn-add" onclick="openAddModal()">+ Add Account</button>
+                <button class="btn btn-refresh" onclick="openProxyModal()">+ Add Proxy</button>
+                <button class="btn btn-enable" onclick="enableAllAccounts()" id="btn-enable-all">
+                    ✓ Enable All
+                </button>
+                <button class="btn btn-refresh" onclick="rotateProxies()" id="btn-rotate-proxies" style="display:none">
+                    ⇄ Rotate Proxies
+                </button>
+            </div>
+        </div>
+
+        <div class="table-wrap" id="legacy-accounts-table">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Account</th>
+                        <th>Status</th>
+                        <th>Errors</th>
+                        <th>Videos</th>
+                        <th>Today</th>
+                        <th>Rate</th>
+                        <th>Credits</th>
+                        <th>Proxy</th>
+                        <th>Last Used</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="accounts-body">
+                    <tr><td colspan="9" class="empty-state">Loading...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Recent Images -->
+        <div class="section-title">
+            <span>Последние изображения <span class="section-count" id="images-count"></span></span>
+        </div>
+        <div class="image-gallery" id="images-list">
+            <div class="empty-state">Загрузка…</div>
+        </div>
+
+        <!-- Recent Videos -->
+        <div class="section-title">
+            <span>Последние видео <span class="section-count" id="videos-count"></span></span>
+        </div>
+
+        <div class="table-wrap" id="videos-wrap">
+            <div id="videos-list">
+                <div class="empty-state">Loading...</div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            Auto-refresh every 3s · Last update: <span id="last-update">—</span>
+        </div>
+    </div>
+
+    <script>
+        const buttonStates = {};
+        let _accounts = [];
+        let _providerMode = null;
+        let _providerReady = false;
+        let _generationKind = 'image';
+        let _referenceFiles = [];
+        let _referenceSlide = 0;
+        let _refinementSource = null;
+        let _resultLightboxItems = [];
+        let _lightboxItems = [];
+        let _lightboxIndex = 0;
+        let _lastSubmittedImageId = null;
+        const _openErrorDetails = new Set();
+        const _technicalErrors = new Map();
+        const _openPromptDetails = new Set();
+        const _promptTexts = new Map();
+
+        // ===== Toast System =====
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            const icon = type === 'success' ? '✓' : type === 'error' ? '✗' : 'ℹ';
+            toast.innerHTML = `<span>${icon}</span><span>${esc(message)}</span>`;
+            container.appendChild(toast);
+            const duration = type === 'error' ? 12000 : 3000;
+            setTimeout(() => {
+                toast.style.animation = 'slideOut 0.3s ease forwards';
+                setTimeout(() => toast.remove(), 300);
+            }, duration);
+        }
+
+        // ===== API Actions =====
+        let _actionInFlight = false;
+
+        function switchGenerationKind(kind) {
+            _generationKind = kind === 'video' ? 'video' : 'image';
+            const isImage = _generationKind === 'image';
+            document.getElementById('generation-tab-image').classList.toggle('active', isImage);
+            document.getElementById('generation-tab-video').classList.toggle('active', !isImage);
+            document.getElementById('image-generation-options').hidden = !isImage;
+            document.getElementById('video-generation-options').hidden = isImage;
+            document.getElementById('reference-upload-button').hidden = !isImage;
+            document.getElementById('reference-strip').hidden = !isImage || !_referenceFiles.length;
+            document.getElementById('refinement-source').hidden = !isImage || !_refinementSource;
+            document.getElementById('generation-title').textContent = isImage
+                ? (_refinementSource ? 'Доработать изображение' : 'Создать изображения')
+                : 'Создать видео';
+            document.getElementById('generation-prompt').placeholder = isImage
+                ? (_refinementSource
+                    ? 'Напишите, что хотите изменить в этом изображении…'
+                    : 'Опишите изображение, композицию, освещение и желаемый стиль…')
+                : 'Опишите сцену, движение камеры, освещение и желаемый стиль…';
+            document.getElementById('generation-submit').textContent = isImage
+                ? (_refinementSource ? 'Создать новую версию' : 'Создать изображения')
+                : 'Создать видео';
+        }
+
+        function startRefinement(taskId, resultIndex) {
+            const item = _resultLightboxItems.find(candidate =>
+                candidate.taskId === taskId && candidate.resultIndex === resultIndex
+            );
+            if (!item) {
+                showToast('Не удалось найти изображение для доработки', 'error');
+                return;
+            }
+            _refinementSource = {...item};
+            switchGenerationKind('image');
+            document.getElementById('image-generation-model').value = item.model || 'nano2';
+            document.getElementById('image-generation-aspect').value = item.aspect || '1:1';
+            document.getElementById('image-generation-count').value = '1';
+            document.getElementById('refinement-source-image').src = item.url;
+            document.getElementById('refinement-source-title').textContent =
+                `Доработка версии ${item.revision || 1}`;
+            document.getElementById('refinement-source').hidden = false;
+            document.getElementById('generation-title').textContent = 'Доработать изображение';
+            document.getElementById('generation-prompt').value = '';
+            document.getElementById('generation-prompt').placeholder =
+                'Напишите, что хотите изменить в этом изображении…';
+            document.getElementById('generation-submit').textContent = 'Создать новую версию';
+            closeLightbox();
+            document.getElementById('generation-form').scrollIntoView({behavior: 'smooth', block: 'start'});
+            setTimeout(() => document.getElementById('generation-prompt').focus(), 350);
+        }
+
+        function cancelRefinement() {
+            _refinementSource = null;
+            document.getElementById('refinement-source').hidden = true;
+            document.getElementById('generation-prompt').value = '';
+            switchGenerationKind('image');
+        }
+
+        function openRefinementSource() {
+            if (!_refinementSource) return;
+            _lightboxItems = [{..._refinementSource, kind: 'refinement-source'}];
+            openLightbox(0);
+        }
+
+        function refineLightboxItem() {
+            const item = _lightboxItems[_lightboxIndex];
+            if (!item || item.kind !== 'result') return;
+            startRefinement(item.taskId, item.resultIndex);
+        }
+
+        function addReferenceFiles(fileList) {
+            const accepted = ['image/png', 'image/jpeg', 'image/webp'];
+            for (const file of Array.from(fileList || [])) {
+                if (!accepted.includes(file.type)) {
+                    showToast(`${file.name}: допустимы PNG, JPEG и WebP`, 'error');
+                    continue;
+                }
+                if (file.size > 30 * 1024 * 1024) {
+                    showToast(`${file.name}: файл больше 30 МБ`, 'error');
+                    continue;
+                }
+                if (_referenceFiles.length >= 10) {
+                    showToast('Можно добавить не более 10 референсов', 'error');
+                    break;
+                }
+                _referenceFiles.unshift({ file, url: URL.createObjectURL(file) });
+            }
+            document.getElementById('reference-files').value = '';
+            _referenceSlide = 0;
+            renderReferences();
+        }
+
+        function renderReferences() {
+            const strip = document.getElementById('reference-strip');
+            strip.hidden = _generationKind !== 'image' || !_referenceFiles.length;
+            document.getElementById('reference-track').innerHTML = _referenceFiles.map((item, index) => `
+                <div class="reference-thumb" onclick="openReferenceLightbox(${index})" title="Увеличить ${esc(item.file.name)}">
+                    <img src="${item.url}" alt="${esc(item.file.name)}">
+                    <button class="remove-reference" type="button" title="Удалить референс" onclick="event.stopPropagation(); removeReference(${index})">×</button>
+                </div>`).join('');
+            const max = Math.max(0, _referenceFiles.length - 3);
+            _referenceSlide = Math.min(_referenceSlide, max);
+            const showArrows = _referenceFiles.length > 3;
+            document.getElementById('reference-prev').style.visibility = showArrows ? 'visible' : 'hidden';
+            document.getElementById('reference-next').style.visibility = showArrows ? 'visible' : 'hidden';
+            updateReferenceSlider();
+        }
+
+        function updateReferenceSlider() {
+            const viewport = document.querySelector('.reference-viewport');
+            const step = viewport ? ((viewport.clientWidth - 20) / 3 + 10) : 0;
+            document.getElementById('reference-track').style.transform = `translateX(-${_referenceSlide * step}px)`;
+            document.getElementById('reference-prev').disabled = _referenceSlide === 0;
+            document.getElementById('reference-next').disabled = _referenceSlide >= Math.max(0, _referenceFiles.length - 3);
+        }
+
+        function moveReferenceSlider(direction) {
+            _referenceSlide = Math.max(0, Math.min(_referenceSlide + direction, Math.max(0, _referenceFiles.length - 3)));
+            updateReferenceSlider();
+        }
+
+        function removeReference(index) {
+            const [removed] = _referenceFiles.splice(index, 1);
+            if (removed) URL.revokeObjectURL(removed.url);
+            renderReferences();
+        }
+
+        function openReferenceLightbox(index) {
+            _lightboxItems = _referenceFiles.map((item, refIndex) => ({
+                url: item.url, download: item.url, name: item.file.name, kind: 'reference', refIndex
+            }));
+            openLightbox(index);
+        }
+
+        function openResultLightbox(index) {
+            _lightboxItems = _resultLightboxItems;
+            openLightbox(index);
+        }
+
+        function openLightbox(index) {
+            if (!_lightboxItems.length) return;
+            _lightboxIndex = Math.max(0, Math.min(index, _lightboxItems.length - 1));
+            document.getElementById('image-lightbox').hidden = false;
+            document.body.style.overflow = 'hidden';
+            updateLightbox();
+        }
+
+        function updateLightbox() {
+            const item = _lightboxItems[_lightboxIndex];
+            document.getElementById('lightbox-image').src = item.url;
+            const download = document.getElementById('lightbox-download');
+            download.href = item.download || item.url;
+            download.download = item.name || '';
+            download.textContent = item.kind === 'result' ? 'Скачать оригинал' : 'Скачать изображение';
+            const upscaleDownload = document.getElementById('lightbox-upscale-download');
+            const upscaleStart = document.getElementById('lightbox-upscale-start');
+            const refineButton = document.getElementById('lightbox-refine');
+            const upscale = item.upscale || {};
+            upscaleDownload.hidden = item.kind !== 'result' || upscale.status !== 'completed';
+            upscaleStart.hidden = item.kind !== 'result' || upscale.status === 'completed';
+            refineButton.hidden = item.kind !== 'result';
+            if (!upscaleDownload.hidden) {
+                upscaleDownload.href = upscale.url;
+                upscaleDownload.download = `${item.taskId}-${item.resultIndex + 1}-2k`;
+            }
+            if (!upscaleStart.hidden) {
+                upscaleStart.disabled = upscale.status === 'pending' || upscale.status === 'generating';
+                upscaleStart.textContent = upscaleStart.disabled
+                    ? '2K готовится…'
+                    : (upscale.status === 'failed' ? 'Повторить 2K' : 'Подготовить 2K');
+                upscaleStart.title = upscale.status === 'failed' && upscale.error
+                    ? upscale.error
+                    : '';
+            }
+            const deleteButton = document.getElementById('lightbox-delete');
+            deleteButton.hidden = item.kind === 'refinement-source';
+            deleteButton.textContent = item.kind === 'reference' ? 'Удалить референс' : 'Удалить задание';
+            document.getElementById('lightbox-prev').disabled = _lightboxIndex === 0;
+            document.getElementById('lightbox-next').disabled = _lightboxIndex === _lightboxItems.length - 1;
+        }
+
+        function moveLightbox(direction) {
+            _lightboxIndex = Math.max(0, Math.min(_lightboxIndex + direction, _lightboxItems.length - 1));
+            updateLightbox();
+        }
+
+        function closeLightbox() {
+            document.getElementById('image-lightbox').hidden = true;
+            document.body.style.overflow = '';
+        }
+
+        function lightboxBackdrop(event) {
+            if (event.target.id === 'image-lightbox') closeLightbox();
+        }
+
+        async function deleteLightboxItem() {
+            const item = _lightboxItems[_lightboxIndex];
+            if (item.kind === 'reference') {
+                closeLightbox();
+                removeReference(item.refIndex);
+                return;
+            }
+            if (!confirm('Удалить это задание и все его изображения с сервера?')) return;
+            const response = await fetch(`/api/images/${encodeURIComponent(item.taskId)}`, { method: 'DELETE' });
+            const data = await response.json();
+            if (!response.ok || !data.success) {
+                showToast(data.error?.message || 'Не удалось удалить изображение', 'error');
+                return;
+            }
+            closeLightbox();
+            showToast('Изображение удалено', 'success');
+            await fetchDashboard();
+        }
+
+        async function requestImageUpscale(taskId, resultIndex, button = null) {
+            if (button) button.disabled = true;
+            try {
+                const response = await fetch(
+                    `/api/images/${encodeURIComponent(taskId)}/upscale/${resultIndex}?scale=2k`,
+                    { method: 'POST' }
+                );
+                const data = await response.json();
+                if (!response.ok || !data.success) {
+                    throw new Error(data.error?.message || 'Не удалось запустить подготовку 2K');
+                }
+                showToast(data.message || 'Подготовка версии 2K запущена', 'success');
+                await fetchDashboard();
+            } catch (error) {
+                showToast(error.message || 'Не удалось подготовить 2K', 'error');
+                if (button) button.disabled = false;
+            }
+        }
+
+        async function requestLightboxUpscale() {
+            const item = _lightboxItems[_lightboxIndex];
+            if (!item || item.kind !== 'result') return;
+            await requestImageUpscale(
+                item.taskId,
+                item.resultIndex,
+                document.getElementById('lightbox-upscale-start')
+            );
+            closeLightbox();
+        }
+
+        window.addEventListener('resize', updateReferenceSlider);
+        document.addEventListener('keydown', event => {
+            if (document.getElementById('image-lightbox').hidden) return;
+            if (event.key === 'Escape') closeLightbox();
+            if (event.key === 'ArrowLeft') moveLightbox(-1);
+            if (event.key === 'ArrowRight') moveLightbox(1);
+        });
+
+        async function submitGeneration(event) {
+            event.preventDefault();
+            if (_providerMode !== 'gflow' || !_providerReady) {
+                showToast('Профиль Google Flow не готов', 'error');
+                return;
+            }
+
+            const promptText = document.getElementById('generation-prompt').value.trim();
+            if (!promptText) {
+                showToast('Введите промпт', 'error');
+                return;
+            }
+
+            const submit = document.getElementById('generation-submit');
+            const last = document.getElementById('generation-last-request');
+            submit.disabled = true;
+            submit.textContent = 'Отправка…';
+            last.hidden = false;
+            last.className = 'generation-last-request is-pending';
+            last.textContent = 'Отправляем задание на сервер… Текст и референсы пока сохранены в форме.';
+            try {
+                const isImage = _generationKind === 'image';
+                const refinementRequested = isImage && Boolean(_refinementSource);
+                const body = isImage ? new FormData() : {
+                        prompt: promptText,
+                        model: document.getElementById('generation-model').value,
+                        orientation: document.getElementById('generation-orientation').value,
+                        duration: 8
+                    };
+                if (isImage) {
+                    body.append('prompt', promptText);
+                    body.append('model', document.getElementById('image-generation-model').value);
+                    body.append('aspect', document.getElementById('image-generation-aspect').value);
+                    body.append('count', document.getElementById('image-generation-count').value);
+                    if (_refinementSource) {
+                        body.append('source_image_id', _refinementSource.taskId);
+                        body.append('source_index', String(_refinementSource.resultIndex));
+                    }
+                    _referenceFiles.slice().reverse().forEach(item => body.append('references', item.file, item.file.name));
+                }
+                const res = await fetch(isImage ? '/api/images' : '/api/videos', {
+                    method: 'POST',
+                    headers: isImage ? undefined : { 'Content-Type': 'application/json' },
+                    body: isImage ? body : JSON.stringify(body)
+                });
+                const responseText = await res.text();
+                let result = {};
+                try {
+                    result = responseText ? JSON.parse(responseText) : {};
+                } catch (parseError) {
+                    throw new Error(
+                        `Сервер вернул некорректный ответ (HTTP ${res.status}). Задание могло быть принято; обновите страницу и проверьте список последних изображений.`
+                    );
+                }
+                if (!res.ok || !result.success) {
+                    throw new Error(result.error?.message || result.message || 'Не удалось создать задание');
+                }
+                const jobId = isImage
+                    ? (result.data?.image_id || '')
+                    : (result.data?.videoId || result.data?.video_id || '');
+                if (isImage) _lastSubmittedImageId = jobId || null;
+                document.getElementById('generation-prompt').value = '';
+                if (isImage) {
+                    _referenceFiles.forEach(item => URL.revokeObjectURL(item.url));
+                    _referenceFiles = [];
+                    renderReferences();
+                    cancelRefinement();
+                }
+                last.hidden = false;
+                last.className = 'generation-last-request is-success';
+                last.textContent = jobId
+                    ? `${refinementRequested ? 'Новая версия' : 'Задание'} ${jobId} принято. Статус обновляется автоматически.`
+                    : 'Задание принято. Статус обновляется автоматически.';
+                showToast(
+                    refinementRequested
+                        ? 'Новая версия изображения поставлена в очередь'
+                        : (isImage ? 'Изображения поставлены в очередь' : 'Видео поставлено в очередь'),
+                    'success'
+                );
+                await fetchDashboard();
+            } catch (error) {
+                last.hidden = false;
+                last.className = 'generation-last-request is-error';
+                last.textContent = `Задание не подтверждено: ${error.message || 'ошибка сети'}. Текст и референсы сохранены — можно повторить отправку.`;
+                showToast(error.message || 'Ошибка сети', 'error');
+            } finally {
+                submit.disabled = !_providerReady;
+                submit.textContent = _generationKind === 'image'
+                    ? (_refinementSource ? 'Создать новую версию' : 'Создать изображения')
+                    : 'Создать видео';
+            }
+        }
+
+        async function apiAction(url, method, btnSelector, successMsg) {
+            _actionInFlight = true;
+            const btn = btnSelector ? document.querySelector(btnSelector) : null;
+            if (btn) {
+                btn.classList.add('btn-loading');
+                btn.disabled = true;
+            }
+            try {
+                const res = await fetch(url, { method });
+                const data = await res.json();
+                if (res.ok) {
+                    showToast(successMsg, 'success');
+                } else {
+                    showToast(data.error?.message || data.message || 'Request failed', 'error');
+                }
+            } catch (e) {
+                showToast('Network error', 'error');
+            } finally {
+                _actionInFlight = false;
+                fetchDashboard();
+            }
+        }
+
+        async function retryImage(imageId, button) {
+            button.disabled = true;
+            const original = button.textContent;
+            button.textContent = 'Повторяем…';
+            try {
+                const res = await fetch(`/api/images/${encodeURIComponent(imageId)}/retry`, {
+                    method: 'POST'
+                });
+                const result = await res.json();
+                if (!res.ok || !result.success) {
+                    throw new Error(result.error?.message || result.message || 'Не удалось повторить');
+                }
+                _lastSubmittedImageId = result.data?.image_id || null;
+                showToast('Задание повторно поставлено в очередь', 'success');
+                await fetchDashboard();
+            } catch (error) {
+                showToast(error.message || 'Ошибка сети', 'error');
+                button.disabled = false;
+                button.textContent = original;
+            }
+        }
+
+        // ===== Relaxed Mode Toggle =====
+        let _relaxedEnabled = true;
+
+        async function loadRelaxedStatus() {
+            try {
+                const res = await fetch('/api/generation/relaxed-status');
+                const data = await res.json();
+                if (res.ok) {
+                    _relaxedEnabled = !data.data.force_disabled;
+                    updateRelaxedButton();
+                }
+            } catch (e) {}
+        }
+
+        function updateRelaxedButton() {
+            const btn = document.getElementById('btn-relaxed-toggle');
+            if (!btn) return;
+            if (_relaxedEnabled) {
+                btn.textContent = '✅ Relaxed: ON';
+                btn.className = 'btn btn-enable';
+            } else {
+                btn.textContent = '⛔ Relaxed: OFF';
+                btn.className = 'btn btn-disable';
+            }
+        }
+
+        async function toggleRelaxedMode() {
+            const newState = !_relaxedEnabled;
+            try {
+                const res = await fetch(`/api/generation/relaxed-mode?enabled=${newState}`, { method: 'POST' });
+                const data = await res.json();
+                if (res.ok) {
+                    _relaxedEnabled = newState;
+                    updateRelaxedButton();
+                    showToast(data.message || (newState ? 'Relaxed enabled' : 'Relaxed disabled'), 'success');
+                } else {
+                    showToast(data.error?.message || 'Failed', 'error');
+                }
+            } catch (e) {
+                showToast('Network error', 'error');
+            }
+        }
+
+        async function toggleAccountRelaxed(id, currentlyDisabled) {
+            const enable = currentlyDisabled; // flip
+            try {
+                const res = await fetch(`/api/accounts/${id}/relaxed-mode?enabled=${enable}`, { method: 'POST' });
+                const data = await res.json();
+                if (res.ok) {
+                    showToast(data.message || 'Updated', 'success');
+                    fetchDashboard();
+                } else {
+                    showToast(data.error?.message || 'Failed', 'error');
+                }
+            } catch (e) {
+                showToast('Network error', 'error');
+            }
+        }
+
+        function enableAccount(id) {
+            apiAction(`/api/accounts/${id}/enable`, 'POST', `[data-action="enable"][data-id="${id}"]`, 'Account enabled');
+        }
+
+        function disableAccount(id) {
+            apiAction(`/api/accounts/${id}/disable`, 'POST', `[data-action="disable"][data-id="${id}"]`, 'Account disabled');
+        }
+
+        async function cooldownAccount(id, email) {
+            const raw = prompt(`Put ${email} in cooldown for how many hours?`, '3');
+            if (raw === null) return;
+            const hours = parseFloat(raw);
+            if (!hours || hours <= 0 || hours > 168) {
+                showToast('Cooldown hours must be between 0 and 168', 'error');
+                return;
+            }
+            try {
+                const res = await fetch(`/api/accounts/${id}/cooldown?hours=${hours}`, { method: 'POST' });
+                const data = await res.json();
+                if (res.ok && data.success) {
+                    showToast(data.message || `Cooldown ${hours}h set`, 'success');
+                    loadDashboardData();
+                } else {
+                    showToast(data.error?.message || 'Cooldown failed', 'error');
+                }
+            } catch (e) {
+                showToast('Network error', 'error');
+            }
+        }
+
+        function refreshAccount(id) {
+            apiAction(`/api/accounts/${id}/refresh`, 'POST', `[data-action="refresh"][data-id="${id}"]`, 'Token refreshed');
+        }
+
+        function deleteAccount(id) {
+            if (!confirm('Delete this account? This will remove it from DB and accounts.json.')) return;
+            apiAction(`/api/accounts/${id}`, 'DELETE', `[data-action="delete"][data-id="${id}"]`, 'Account deleted');
+        }
+
+        function authorizeAccount(id) {
+            if (!confirm('Start authorization (puppeteer) for this account?')) return;
+            apiAction(`/api/accounts/${id}/authorize`, 'POST', `[data-action="auth"][data-id="${id}"]`, 'Authorization started');
+        }
+
+        function onAccProxySelectChange() {
+            const select = document.getElementById('acc-proxy-select');
+            const manualInput = document.getElementById('acc-proxy');
+            if (select && manualInput) {
+                manualInput.style.display = select.value === 'custom' ? '' : 'none';
+                if (select.value !== 'custom') {
+                    manualInput.value = '';
+                }
+            }
+        }
+
+        async function loadProxiesDropdown() {
+            try {
+                const res = await fetch('/api/proxies');
+                const result = await res.json();
+                if (res.ok && result.success && result.data && result.data.proxies) {
+                    ['acc-proxy-select', 'rt-proxy-select'].forEach(id => {
+                        const sel = document.getElementById(id);
+                        if (!sel) return;
+                        sel.innerHTML = `
+                            <option value="">-- No Proxy / Auto-assign --</option>
+                            <option value="custom">Enter Manually...</option>
+                        `;
+                        result.data.proxies.forEach(p => {
+                            const option = document.createElement('option');
+                            option.value = p.raw;
+                            option.textContent = `${p.label} (${p.parsed.replace(/^https?:\/\//, '').substring(0, 30)})`;
+                            sel.appendChild(option);
+                        });
+                    });
+                }
+            } catch (e) {
+                console.error("Failed to load proxies", e);
+            }
+        }
+
+        function onAccProxyTypeChange() {
+            const type = document.querySelector('input[name="acc-proxy-type"]:checked').value;
+            document.getElementById('acc-proxy-dc-field').style.display = type === 'datacenter' ? '' : 'none';
+            document.getElementById('acc-proxy-rp-field').style.display = type === 'residential' ? '' : 'none';
+        }
+
+        function switchAddTab(tab) {
+            document.getElementById('tab-login').classList.toggle('active', tab === 'login');
+            document.getElementById('tab-oauth').classList.toggle('active', tab === 'oauth');
+            document.getElementById('add-tab-login').style.display = tab === 'login' ? '' : 'none';
+            document.getElementById('add-tab-oauth').style.display = tab === 'oauth' ? '' : 'none';
+        }
+
+        function openAddModal() {
+            document.getElementById('add-account-modal').classList.add('active');
+            switchAddTab('login');
+            document.getElementById('acc-name').focus();
+            loadProxiesDropdown();
+        }
+
+        function closeAddModal() {
+            document.getElementById('add-account-modal').classList.remove('active');
+            // Reset tab 1 fields
+            document.getElementById('acc-name').value = '';
+            document.getElementById('acc-email').value = '';
+            document.getElementById('acc-password').value = '';
+            document.getElementById('acc-otp').value = '';
+            document.getElementById('acc-proxy').value = '';
+            document.getElementById('acc-residential-proxy').value = '';
+            const select = document.getElementById('acc-proxy-select');
+            if (select) { select.value = ''; onAccProxySelectChange(); }
+            const dc = document.querySelector('input[name="acc-proxy-type"][value="datacenter"]');
+            if (dc) { dc.checked = true; onAccProxyTypeChange(); }
+            // Reset tab 2 fields
+            document.getElementById('rt-email').value = '';
+            document.getElementById('rt-refresh-token').value = '';
+            document.getElementById('rt-remark').value = '';
+            document.getElementById('rt-proxy').value = '';
+            const rtSelect = document.getElementById('rt-proxy-select');
+            if (rtSelect) { rtSelect.value = ''; onRtProxySelectChange(); }
+        }
+
+        function onRtProxySelectChange() {
+            const select = document.getElementById('rt-proxy-select');
+            const manualInput = document.getElementById('rt-proxy');
+            if (select && manualInput) {
+                manualInput.style.display = select.value === 'custom' ? '' : 'none';
+                if (select.value !== 'custom') manualInput.value = '';
+            }
+        }
+
+        async function submitAddAccount() {
+            const isOAuth = document.getElementById('tab-oauth').classList.contains('active');
+            if (isOAuth) {
+                await submitAddAccountOAuth();
+            } else {
+                await submitAddAccountFull();
+            }
+        }
+
+        async function submitAddAccountOAuth() {
+            const email = document.getElementById('rt-email').value.trim();
+            const refresh_token = document.getElementById('rt-refresh-token').value.trim();
+            const remark = document.getElementById('rt-remark').value.trim();
+            const selectVal = document.getElementById('rt-proxy-select').value;
+            const proxy = selectVal === 'custom'
+                ? document.getElementById('rt-proxy').value.trim()
+                : selectVal.trim();
+
+            if (!email || !refresh_token) {
+                showToast('Email and Refresh Token are required', 'error');
+                return;
+            }
+
+            const btn = document.getElementById('btn-add-submit');
+            btn.classList.add('btn-loading');
+            btn.disabled = true;
+
+            try {
+                const res = await fetch('/api/accounts', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, refresh_token, remark: remark || null, proxy: proxy || null })
+                });
+                const result = await res.json();
+                if (res.ok && result.success) {
+                    showToast('Account added successfully', 'success');
+                    closeAddModal();
+                    fetchDashboard();
+                } else {
+                    showToast(result.error?.message || result.message || 'Failed to add account', 'error');
+                }
+            } catch (e) {
+                showToast('Network error', 'error');
+            } finally {
+                btn.classList.remove('btn-loading');
+                btn.disabled = false;
+            }
+        }
+
+        async function submitAddAccountFull() {
+            const name = document.getElementById('acc-name').value.trim();
+            const email = document.getElementById('acc-email').value.trim();
+            const password = document.getElementById('acc-password').value.trim();
+            const otp_secret = document.getElementById('acc-otp').value.trim();
+            const proxyType = document.querySelector('input[name="acc-proxy-type"]:checked').value;
+            
+            let proxy = '';
+            if (proxyType === 'datacenter') {
+                const selectVal = document.getElementById('acc-proxy-select').value;
+                if (selectVal === 'custom') {
+                    proxy = document.getElementById('acc-proxy').value.trim();
+                } else {
+                    proxy = selectVal.trim();
+                }
+            }
+            
+            const residential_proxy = proxyType === 'residential' ? document.getElementById('acc-residential-proxy').value.trim() : '';
+
+            if (!name || !email || !password) {
+                showToast('Name, email and password are required', 'error');
+                return;
+            }
+
+            const btn = document.getElementById('btn-add-submit');
+            btn.classList.add('btn-loading');
+            btn.disabled = true;
+
+            try {
+                const res = await fetch('/api/accounts/add-full', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, email, password, otp_secret, proxy, residential_proxy: residential_proxy || null })
+                });
+                const result = await res.json();
+                if (res.ok && result.success) {
+                    showToast('Account added successfully', 'success');
+                    closeAddModal();
+                    fetchDashboard();
+                } else {
+                    showToast(result.error?.message || result.message || 'Failed to add account', 'error');
+                }
+            } catch (e) {
+                showToast('Network error', 'error');
+            } finally {
+                btn.classList.remove('btn-loading');
+                btn.disabled = false;
+            }
+        }
+
+        // Close modal on overlay click
+        document.getElementById('add-account-modal').addEventListener('click', function(e) {
+            if (e.target === this) closeAddModal();
+        });
+
+        async function rotateProxies() {
+            if (!confirm('Назначить всем аккаунтам новые прокси из пула? Текущие прокси будут заменены.')) return;
+            const btn = document.getElementById('btn-rotate-proxies');
+            btn.classList.add('btn-loading');
+            btn.disabled = true;
+            _actionInFlight = true;
+            try {
+                const res = await fetch('/api/accounts/rotate-proxies', { method: 'POST' });
+                const data = await res.json();
+                if (res.ok) {
+                    showToast(data.message || 'Proxies rotated', 'success');
+                } else {
+                    showToast(data.error?.message || data.message || 'Failed', 'error');
+                }
+            } catch (e) {
+                showToast('Network error', 'error');
+            } finally {
+                btn.classList.remove('btn-loading');
+                btn.disabled = false;
+                _actionInFlight = false;
+                fetchDashboard();
+            }
+        }
+
+        async function enableAllAccounts() {
+            _actionInFlight = true;
+            const btn = document.getElementById('btn-enable-all');
+            btn.classList.add('btn-loading');
+            btn.disabled = true;
+
+            try {
+                const res = await fetch('/api/dashboard/data');
+                const data = await res.json();
+                let enabled = 0;
+
+                for (const acc of data.accounts) {
+                    if (!acc.is_active) {
+                        try {
+                            await fetch(`/api/accounts/${acc.id}/enable`, { method: 'POST' });
+                            enabled++;
+                        } catch (e) {}
+                    }
+                }
+
+                if (enabled > 0) {
+                    showToast(`Enabled ${enabled} accounts`, 'success');
+                } else {
+                    showToast('No inactive accounts', 'info');
+                }
+            } catch (e) {
+                showToast('Network error', 'error');
+            } finally {
+                btn.classList.remove('btn-loading');
+                btn.disabled = false;
+                _actionInFlight = false;
+                fetchDashboard();
+            }
+        }
+
+        // ===== Main Fetch =====
+        async function fetchDashboard() {
+            if (_actionInFlight) return; // don't overwrite DOM while action is running
+            try {
+                const res = await fetch('/api/dashboard/data');
+                const data = await res.json();
+                updateUI(data);
+                document.getElementById('service-status').textContent = '● Online';
+                document.getElementById('service-status').className = 'status-badge status-online';
+            } catch (e) {
+                document.getElementById('service-status').textContent = '● Offline';
+                document.getElementById('service-status').className = 'status-badge status-offline';
+            }
+        }
+
+        // ===== UI Update =====
+        function updateUI(data) {
+            _providerMode = data.provider_mode || 'legacy';
+            _providerReady = data.provider_ready !== false;
+            const isGflow = _providerMode === 'gflow';
+            ['legacy-account-stats', 'legacy-generation-controls', 'legacy-account-management', 'legacy-accounts-table']
+                .forEach(id => {
+                    const element = document.getElementById(id);
+                    if (element) element.style.display = isGflow ? 'none' : '';
+                });
+            const workspace = document.getElementById('generation-form');
+            workspace.style.display = isGflow ? '' : 'none';
+            const providerPill = document.getElementById('provider-pill');
+            providerPill.textContent = _providerReady ? '● Google Flow готов' : '● Требуется авторизация';
+            providerPill.classList.toggle('not-ready', !_providerReady);
+            document.getElementById('generation-submit').disabled = !_providerReady;
+
+            const ic = data.image_counts || {};
+            const vc = data.video_counts || {};
+
+            // Stats cards
+            document.getElementById('total-images').textContent = ic.total || 0;
+            document.getElementById('completed-images').textContent = ic.completed || 0;
+            document.getElementById('failed-images').textContent = ic.failed || 0;
+            document.getElementById('generating-images').textContent = ic.generating || 0;
+            document.getElementById('pending-images').textContent = ic.pending || 0;
+            document.getElementById('total-videos').textContent = vc.total || 0;
+            document.getElementById('completed-videos').textContent = vc.completed || 0;
+            document.getElementById('failed-videos').textContent = vc.failed || 0;
+            document.getElementById('generating-videos').textContent = vc.generating || 0;
+            document.getElementById('pending-videos').textContent = vc.pending || 0;
+
+            // Success rate
+            const rate = data.success_rate || 0;
+            document.getElementById('success-rate').textContent = rate + '%';
+            document.getElementById('success-bar').style.width = rate + '%';
+            document.getElementById('success-subtitle').textContent = rate + '% success';
+
+            // Accounts
+            const active = data.active_accounts || 0;
+            const total = data.total_accounts || 0;
+            document.getElementById('active-accounts').textContent = active;
+            document.getElementById('total-accounts-sub').textContent = `of ${total} total`;
+            document.getElementById('inactive-accounts').textContent = total - active;
+            document.getElementById('accounts-count').textContent = `(${total})`;
+
+            // Memory
+            document.getElementById('memory-usage').textContent = (data.memory_mb || 0) + ' MB';
+
+            // Memory card highlighting
+            const memCard = document.getElementById('memory-usage').closest('.card');
+            memCard.classList.remove('error', 'warning');
+            if (data.memory_mb > 2000) memCard.classList.add('error');
+            else if (data.memory_mb > 1000) memCard.classList.add('warning');
+
+            // Uptime
+            document.getElementById('uptime').textContent = '⏱ ' + (data.uptime || '—');
+
+            // Accounts table
+            const accounts = data.accounts || [];
+            _accounts = accounts;
+            const tbody = document.getElementById('accounts-body');
+
+            if (accounts.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="9" class="empty-state">No accounts</td></tr>';
+            } else {
+                tbody.innerHTML = accounts.map(acc => {
+                    const isActive = acc.is_active && (acc.status === 'active' || acc.status === 'relaxed_only');
+                    const rowClass = isActive ? '' : 'inactive-row';
+                    const statusClass = isActive ? 'active' : (acc.status || 'inactive');
+                    const _statusLabels = {
+                        resting: '🛏 Resting (3h)',
+                        throttled: '⏸ Throttled (1h)',
+                        rate_limited: '⏸ Rate limited',
+                        needs_reauth: '🔑 Needs re-auth',
+                        needs_auth: '🔑 Needs auth',
+                        check_required: '⚠ Check required',
+                        free_tier: '💳 Free tier',
+                    };
+                    const statusLabel = _statusLabels[acc.status] || (acc.status || '—');
+
+                    const consec = acc.consecutive_errors || 0;
+                    const maxF = 3;
+                    const pct = Math.min((consec / maxF) * 100, 100);
+                    let fClass = 'ok', fColor = '#4ade80';
+                    if (consec >= maxF) { fClass = 'danger'; fColor = '#f87171'; }
+                    else if (consec >= maxF - 1) { fClass = 'warning'; fColor = '#fbbf24'; }
+
+                    const proxyShort = acc.proxy ? acc.proxy.replace(/^https?:\/\//, '').substring(0, 20) + (acc.proxy.length > 30 ? '…' : '') : '—';
+
+                    return `
+                        <tr class="${rowClass}">
+                            <td>
+                                <div class="account-info">
+                                    <span class="account-email">${esc(acc.email)}</span>
+                                    ${acc.remark ? `<span class="account-remark">${esc(acc.remark)}</span>` : ''}
+                                </div>
+                            </td>
+                            <td><span class="badge badge-${statusClass}">${esc(statusLabel)}</span></td>
+                            <td>
+                                <div class="failures-indicator">
+                                    <span class="failures-count ${fClass}">${consec}</span>
+                                    <div class="failures-bar">
+                                        <div class="failures-bar-fill" style="width:${pct}%;background:${fColor}"></div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>${acc.total_videos || 0}</td>
+                            <td>${acc.today_count || 0}</td>
+                            <td>${acc.success_rate || 0}%</td>
+                            <td>
+                                <span class="badge ${(acc.credits !== null && acc.credits !== undefined && acc.credits < 100) ? 'badge-failed' : 'badge-active'}">${(acc.credits !== null && acc.credits !== undefined) ? acc.credits : '—'}</span>
+                            </td>
+                            <td><span class="proxy-tag" title="${esc(acc.proxy || '')}">${esc(proxyShort)}</span></td>
+                            <td style="font-size:12px;color:#4a4a5e">${acc.last_used_at ? formatDate(acc.last_used_at) : '—'}</td>
+                            <td>
+                                <div class="btn-group">
+                                    ${isActive
+                                        ? `<button class="btn btn-disable" data-action="disable" data-id="${acc.id}" onclick="disableAccount(${acc.id})">Disable</button>`
+                                        : `<button class="btn btn-enable" data-action="enable" data-id="${acc.id}" onclick="enableAccount(${acc.id})">Enable</button>`
+                                    }
+                                    <button class="btn btn-refresh" data-action="refresh" data-id="${acc.id}" onclick="refreshAccount(${acc.id})">↻</button>
+                                    <button class="btn btn-disable" title="Put in cooldown" onclick="cooldownAccount(${acc.id}, '${esc(acc.email)}')">🛏</button>
+                                    <button class="btn ${acc.relaxed_disabled ? 'btn-disable' : 'btn-enable'}" title="${acc.relaxed_disabled ? 'Relaxed OFF — click to enable' : 'Relaxed ON — click to disable'}" onclick="toggleAccountRelaxed(${acc.id}, ${acc.relaxed_disabled})">${acc.relaxed_disabled ? '⛔R' : '✅R'}</button>
+                                    <button class="btn btn-auth${acc.auth_running ? ' btn-loading' : ''}" data-action="auth" data-id="${acc.id}" onclick="authorizeAccount(${acc.id})" ${acc.auth_running ? 'disabled' : ''}>Auth</button>
+                                    <button class="btn btn-refresh" title="Edit proxy" onclick="openEditProxyModal(${acc.id})">✏</button>
+                                    <button class="btn btn-danger" data-action="delete" data-id="${acc.id}" onclick="deleteAccount(${acc.id})">Del</button>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+
+            // Images list
+            const imageTasks = data.recent_images || [];
+            if (_lastSubmittedImageId) {
+                const submitted = imageTasks.find(task => task.image_id === _lastSubmittedImageId);
+                const last = document.getElementById('generation-last-request');
+                if (submitted && last) {
+                    const labels = {
+                        pending: 'ожидает запуска',
+                        generating: 'выполняется',
+                        completed: 'готово — результат находится ниже',
+                        failed: 'завершилось ошибкой — ниже доступна кнопка «Повторить»'
+                    };
+                    last.hidden = false;
+                    last.className = `generation-last-request ${submitted.status === 'failed' ? 'is-error' : (submitted.status === 'completed' ? 'is-success' : 'is-pending')}`;
+                    last.textContent = `Задание ${_lastSubmittedImageId}: ${labels[submitted.status] || submitted.status}.`;
+                }
+            }
+            _resultLightboxItems = [];
+            const imagesList = document.getElementById('images-list');
+            document.getElementById('images-count').textContent = `(${imageTasks.length})`;
+            if (imageTasks.length === 0) {
+                imagesList.innerHTML = '<div class="empty-state">Изображений пока нет</div>';
+            } else {
+                imagesList.innerHTML = imageTasks.map(task => {
+                    const status = task.status || 'pending';
+                    const images = Array.isArray(task.images) ? task.images : [];
+                    const preview = images.length
+                        ? `<div class="image-results ${images.length === 1 ? 'single' : ''}">${images.map((item, idx) => {
+                            const lightboxIndex = _resultLightboxItems.push({
+                                url: item.url,
+                                download: item.url,
+                                name: `${task.image_id}-${idx + 1}.png`,
+                                kind: 'result',
+                                taskId: task.image_id,
+                                resultIndex: idx,
+                                model: task.model,
+                                aspect: task.aspect,
+                                revision: task.revision || 1,
+                                upscale: item.upscales?.['2k'] || {}
+                            }) - 1;
+                            return `<img src="${esc(item.url)}" loading="lazy" alt="Результат ${idx + 1}" onclick="openResultLightbox(${lightboxIndex})">`;
+                        }).join('')}</div>`
+                        : `<div class="image-placeholder">${status === 'failed' ? 'Генерация завершилась ошибкой' : 'Генерация выполняется…'}</div>`;
+                    const downloads = images.length
+                        ? `<div class="image-downloads">${images.map((item, idx) => {
+                            const upscale = item.upscales?.['2k'] || {};
+                            const originalSize = item.metadata?.width && item.metadata?.height
+                                ? ` (${item.metadata.width}×${item.metadata.height})`
+                                : '';
+                            const upscaleControl = upscale.status === 'completed'
+                                ? `<a class="download-button" href="${esc(upscale.url)}" download>Скачать 2K ${idx + 1}</a>`
+                                : `<button class="download-button" type="button"
+                                    ${upscale.status === 'pending' || upscale.status === 'generating' ? 'disabled' : ''}
+                                    title="${upscale.status === 'failed' ? esc(upscale.error || '') : 'Flow подготовит файл повышенного разрешения'}"
+                                    onclick="requestImageUpscale('${esc(task.image_id)}', ${idx}, this)">${
+                                        upscale.status === 'pending' || upscale.status === 'generating'
+                                            ? '2K готовится…'
+                                            : (upscale.status === 'failed' ? 'Повторить 2K' : 'Подготовить 2K')
+                                    }</button>`;
+                            const upscaleError = upscale.status === 'failed' && upscale.error
+                                ? renderError('UPSCALE_FAILED', upscale.error, `upscale:${task.image_id}:${idx}`)
+                                : '';
+                            return `<a class="download-button" href="${esc(item.url)}" download>Скачать оригинал ${idx + 1}${originalSize}</a>
+                                <button class="download-button" type="button" onclick="startRefinement('${esc(task.image_id)}', ${idx})">Доработать</button>
+                                ${upscaleControl}${upscaleError}`;
+                        }).join('')}</div>`
+                        : '';
+                    return `
+                        <article class="image-task-card">
+                            ${preview}
+                            <div class="image-task-body">
+                                ${renderPrompt(task.prompt, `image:${task.image_id}`, 'image-task-prompt', 'Без промпта')}
+                                <div class="image-task-meta">
+                                    <span class="badge badge-${status}">${esc(status)}</span>
+                                    <span>${esc(task.model || '—')}</span>
+                                    <span>${esc(task.aspect || '—')}</span>
+                                    <span>${task.count || 1} шт.</span>
+                                    <span>Версия ${task.revision || 1}</span>
+                                    <span>${task.created_at ? formatDate(task.created_at) : '—'}</span>
+                                </div>
+                                ${status === 'failed' && task.error_message ? renderError(task.error_code, task.error_message, `image:${task.image_id}`) : ''}
+                                ${status === 'failed' ? `<div class="image-downloads"><button class="download-button" type="button" onclick="retryImage('${esc(task.image_id)}', this)">Повторить</button></div>` : ''}
+                                ${downloads}
+                            </div>
+                        </article>`;
+                }).join('');
+            }
+
+            // Videos list
+            const videos = data.recent_videos || [];
+            const videosList = document.getElementById('videos-list');
+            document.getElementById('videos-count').textContent = `(${videos.length})`;
+
+            if (videos.length === 0) {
+                videosList.innerHTML = '<div class="empty-state">No videos yet</div>';
+            } else {
+                videosList.innerHTML = videos.map(v => {
+                    const status = v.status || 'pending';
+                    const modelClass = (v.model || '').startsWith('veo3') ? 'veo3'
+                        : (v.model || '').startsWith('veo2') ? 'veo2' : 'sora';
+                        
+                    // Check if the backend gave us the specific google_model_key
+                    // If it contains "relaxed", tag it as relaxed, mostly they do now
+                    const googleKey = v.google_model_key || '';
+                    const isRelaxed = googleKey.includes('relaxed');
+                    const modelTypeBadge = googleKey ? `<span class="model-badge ${isRelaxed ? 'model-type-relaxed' : 'model-type-fast'}">${isRelaxed ? 'Relaxed' : 'Fast'}</span>` : '';
+
+                    return `
+                        <div class="video-item">
+                            <div class="video-dot ${status}"></div>
+                            <div class="video-info">
+                                <div style="margin-bottom:4px"><span class="model-badge model-${modelClass}" style="margin-right: 4px;">${esc(v.model || '—')}</span>${modelTypeBadge}</div>
+                                ${renderPrompt(v.prompt, `video:${v.video_id}`, 'video-prompt', 'No prompt')}
+                                <div class="video-meta">
+                                    <span>${v.video_id ? v.video_id.substring(0, 8) + '…' : '—'}</span>
+                                    <span>${esc(v.account_email || '—')}</span>
+                                    ${v.error_code ? `<span style="color:#f87171">${esc(v.error_code)}</span>` : ''}
+                                    ${v.progress > 0 && status === 'generating' ? `<span style="color:#818cf8">${v.progress}%</span>` : ''}
+                                </div>
+                                ${status === 'failed' && v.error_message ? renderError(v.error_code, v.error_message, `video:${v.video_id}`) : ''}
+                            </div>
+                            <div class="video-right">
+                                <div class="video-actions">
+                                    ${v.download_url ? `<a class="download-button" href="${esc(v.download_url)}" download>Скачать MP4${v.resolution ? ` · ${esc(v.resolution)}` : ''}</a>` : ''}
+                                    <span class="badge badge-${status}">${status}</span>
+                                </div>
+                                <span class="video-time">${v.created_at ? formatDate(v.created_at) : '—'}</span>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            document.getElementById('last-update').textContent = new Date().toLocaleTimeString();
+        }
+
+        // ===== Helpers =====
+        function esc(text) {
+            if (!text) return '';
+            const d = document.createElement('div');
+            d.textContent = String(text);
+            return d.innerHTML;
+        }
+
+        function friendlyError(code, message) {
+            const text = String(message || '');
+            if (code === 'UPSCALE_FAILED') {
+                return 'Не удалось подготовить версию 2K. Оригинал по-прежнему доступен; можно повторить попытку.';
+            }
+            if (/profile appears to be in use|SingletonLock|profile[- ]locked/i.test(text)) {
+                return 'Браузерный профиль временно заблокирован. Повторите запрос; списание лимита не произошло.';
+            }
+            if (code === 'RATE_LIMITED' || /quota|rate.?limit|insufficient.*credit/i.test(text)) {
+                return 'Достигнут лимит Google Flow. Попробуйте позже или после обновления кредитов.';
+            }
+            if (code === 'TIMEOUT' || /timeout/i.test(text)) {
+                return 'Google Flow не ответил вовремя. Повторите запрос через несколько минут.';
+            }
+            if (/auth|unauthorized|sign.?in|401/i.test(text)) {
+                return 'Сессия Google Flow требует повторной авторизации.';
+            }
+            return 'Google Flow не смог выполнить запрос. Повторите попытку позже.';
+        }
+
+        function renderError(code, message, key) {
+            _technicalErrors.set(key, String(message || ''));
+            const open = _openErrorDetails.has(key) ? ' open' : '';
+            return `<div class="error-summary">${esc(friendlyError(code, message))}</div>
+                <details class="error-details" data-error-key="${esc(key)}"${open} ontoggle="rememberErrorDetails(this.dataset.errorKey, this.open)">
+                    <summary>Технические подробности</summary>
+                    <pre>${esc(message)}</pre>
+                    <div class="error-details-actions"><button class="copy-error-button" type="button" onclick="copyTechnicalDetails(this.closest('details').dataset.errorKey, this)">Копировать</button></div>
+                </details>`;
+        }
+
+        function renderPrompt(prompt, key, className, fallback) {
+            const text = String(prompt || fallback || '');
+            _promptTexts.set(key, text);
+            if (text.length <= 180) {
+                return `<div class="${className}">${esc(text)}</div>`;
+            }
+            const preview = `${text.slice(0, 150).trimEnd()}…`;
+            const open = _openPromptDetails.has(key) ? ' open' : '';
+            return `<details class="prompt-details" data-prompt-key="${esc(key)}"${open} ontoggle="rememberPromptDetails(this.dataset.promptKey, this.open)">
+                    <summary><span class="prompt-preview">${esc(preview)}</span><button class="copy-prompt-button" type="button" onclick="event.preventDefault(); event.stopPropagation(); copyPrompt(this.closest('details').dataset.promptKey, this)">Копировать</button></summary>
+                    <div class="prompt-full">${esc(text)}</div>
+                </details>`;
+        }
+
+        function rememberPromptDetails(key, isOpen) {
+            if (isOpen) _openPromptDetails.add(key);
+            else _openPromptDetails.delete(key);
+        }
+
+        async function copyPrompt(key, button) {
+            const text = _promptTexts.get(key) || '';
+            try {
+                if (navigator.clipboard && window.isSecureContext) {
+                    await navigator.clipboard.writeText(text);
+                } else {
+                    const area = document.createElement('textarea');
+                    area.value = text;
+                    area.style.position = 'fixed';
+                    area.style.opacity = '0';
+                    document.body.appendChild(area);
+                    area.select();
+                    document.execCommand('copy');
+                    area.remove();
+                }
+                const original = button.textContent;
+                button.textContent = 'Скопировано';
+                setTimeout(() => { button.textContent = original; }, 1600);
+            } catch (error) {
+                showToast('Не удалось скопировать промпт', 'error');
+            }
+        }
+
+        function rememberErrorDetails(key, isOpen) {
+            if (isOpen) _openErrorDetails.add(key);
+            else _openErrorDetails.delete(key);
+        }
+
+        async function copyTechnicalDetails(key, button) {
+            const text = _technicalErrors.get(key) || '';
+            try {
+                if (navigator.clipboard && window.isSecureContext) {
+                    await navigator.clipboard.writeText(text);
+                } else {
+                    const area = document.createElement('textarea');
+                    area.value = text;
+                    area.style.position = 'fixed';
+                    area.style.opacity = '0';
+                    document.body.appendChild(area);
+                    area.select();
+                    document.execCommand('copy');
+                    area.remove();
+                }
+                const original = button.textContent;
+                button.textContent = 'Скопировано';
+                setTimeout(() => { button.textContent = original; }, 1600);
+            } catch (error) {
+                showToast('Не удалось скопировать подробности', 'error');
+            }
+        }
+
+        function formatDate(isoStr) {
+            if (!isoStr) return '—';
+            try {
+                const d = new Date(isoStr + 'Z'); // server sends UTC without timezone
+                const pad = n => String(n).padStart(2, '0');
+                return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())} ${pad(d.getDate())}.${pad(d.getMonth()+1)}`;
+            } catch (e) {
+                return '—';
+            }
+        }
+
+        // ===== Proxy Modal =====
+        function openProxyModal(accountId = null, currentProxy = null) {
+            const select = document.getElementById('proxy-account-id');
+            select.innerHTML = _accounts.map(a =>
+                `<option value="${a.id}"${a.id === accountId ? ' selected' : ''}>${esc(a.email)}</option>`
+            ).join('');
+            document.getElementById('proxy-url-input').value = currentProxy || '';
+            document.getElementById('proxy-modal-title').textContent = accountId ? 'Edit Proxy' : 'Add Proxy';
+            document.getElementById('proxy-modal').classList.add('active');
+            document.getElementById('proxy-url-input').focus();
+        }
+
+        function openEditProxyModal(accountId) {
+            const acc = _accounts.find(a => a.id === accountId);
+            openProxyModal(accountId, acc ? (acc.proxy || '') : '');
+        }
+
+        function closeProxyModal() {
+            document.getElementById('proxy-modal').classList.remove('active');
+            document.getElementById('proxy-url-input').value = '';
+        }
+
+        async function saveProxy() {
+            const accountId = document.getElementById('proxy-account-id').value;
+            const proxy = document.getElementById('proxy-url-input').value.trim();
+            if (!accountId) { showToast('Select an account', 'error'); return; }
+
+            const btn = document.getElementById('btn-proxy-save');
+            btn.classList.add('btn-loading');
+            btn.disabled = true;
+
+            try {
+                const res = await fetch(`/api/accounts/${accountId}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ proxy: proxy || null })
+                });
+                const result = await res.json();
+                if (res.ok && result.success) {
+                    showToast('Proxy saved', 'success');
+                    closeProxyModal();
+                    fetchDashboard();
+                } else {
+                    showToast(result.error?.message || result.message || 'Failed to save proxy', 'error');
+                }
+            } catch (e) {
+                showToast('Network error', 'error');
+            } finally {
+                btn.classList.remove('btn-loading');
+                btn.disabled = false;
+            }
+        }
+
+        document.getElementById('proxy-modal').addEventListener('click', function(e) {
+            if (e.target === this) closeProxyModal();
+        });
+
+        // ===== Init =====
+        fetchDashboard();
+        loadRelaxedStatus();
+        setInterval(fetchDashboard, 3000);
+    </script>
+</body>
+</html>

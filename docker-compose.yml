@@ -1,0 +1,36 @@
+services:
+  veoapi:
+    build: .
+    container_name: veoapi
+    ports:
+      - "127.0.0.1:4000:4000"
+    volumes:
+      - ./config:/app/config
+      - ./data:/app/data
+      - ./logs:/app/logs
+      - ./gflow_profiles:/app/gflow_profiles
+    environment:
+      - TZ=UTC
+      - PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome-stable
+      - PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+      - GFLOW_CLI_HOME=/app/gflow_profiles
+      - GFLOW_CLI_HEADLESS=false
+    restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: '2.0'
+        reservations:
+          memory: 512M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "3"

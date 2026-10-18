@@ -1,0 +1,47 @@
+[server]
+host = "0.0.0.0"
+port = 4000
+
+[generation]
+video_timeout = 1800
+poll_interval = 5
+max_concurrent_videos = 1
+provider_mode = "gflow" # Recommended for current flow.google.com accounts
+
+[capsolver]
+api_key = ""
+
+[proxy]
+enabled = false
+url = ""
+
+[proxy_rotation]
+enabled = false
+
+[browser]
+profile_root = "/app/browser_profiles"
+idle_shutdown_minutes = 15
+keep_artifacts = false
+use_cloakbrowser = false
+
+[gflow]
+home = "/app/gflow_profiles"
+profile = "client"
+# Existing Flow project UUID. Keeping one project avoids creating a new
+# project for every API call and reduces automation churn.
+project_id = ""
+executable = "/usr/local/bin/gflow"
+timeout = 1200
+
+# Optional legacy OAuth mode. Never store its credentials here or in Git.
+# Supply VEOAPI_GOOGLE_OAUTH_CLIENT_ID and VEOAPI_GOOGLE_OAUTH_CLIENT_SECRET
+# through the process environment only.
+
+[cleanup]
+max_age_days = 1
+tmp_max_hours = 6
+log_max_mb = 50
+
+[ip_whitelist]
+enabled = false
+ips = []
