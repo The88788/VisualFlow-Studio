@@ -117,6 +117,41 @@ def main() -> None:
         "maseQ project-aware parser call",
     )
 
+    # The migrated reference picker now renders clickable options reliably,
+    # while pressing Enter can dismiss the picker and clear every previously
+    # attached chip on some cohorts. Choose the uniquely named uploaded asset
+    # by click. A UUID is part of each display name, so this cannot silently
+    # select another user asset with a similar human-readable name.
+    composer_source = replace_once(
+        composer_source,
+        '''            offered = [t.strip() for t in await page.locator(PICKER_OPTION).all_text_contents()]
+            await page.keyboard.press("Enter")
+            await page.wait_for_timeout(2500)''',
+        '''            offered = [t.strip() for t in await page.locator(PICKER_OPTION).all_text_contents()]
+            matching = page.locator(PICKER_OPTION).filter(has_text=name)
+            if await matching.count():
+                await matching.first.click(timeout=4000)
+            else:
+                await page.keyboard.press("Escape")
+            await page.wait_for_timeout(2500)''',
+        "reference picker click commit",
+    )
+    composer_source = replace_once(
+        composer_source,
+        '''            for _ in range(len(name) + 1):  # the '@' and the query it opened
+                await page.keyboard.press("Backspace")''',
+        '''            # Never backspace blindly: after a failed picker commit the
+            # query may already be gone, in which case Backspace removes chips.
+            # Only erase the exact query when it is still visibly at the tail.
+            await page.keyboard.press("Escape")
+            composer_text = await page.locator(COMPOSER).first.inner_text()
+            query = f"@{name}"
+            if composer_text.rstrip().endswith(query):
+                for _ in range(len(query)):
+                    await page.keyboard.press("Backspace")''',
+        "reference query safe cleanup",
+    )
+
     # Upstream verifies the requested model and reference ids before allowing
     # ogiZ0b through, but not the prompt. A stale contenteditable can therefore
     # submit the previous instruction while the dashboard reports the new one.
@@ -189,7 +224,7 @@ def main() -> None:
         "image submit preflight prompt check",
     )
     composer.write_text(composer_source, encoding="utf-8")
-    print("Patched gflow maseQ parsing and image-submit prompt verification")
+    print("Patched gflow uploads, reference picker, and image-submit verification")
 
 
 if __name__ == "__main__":

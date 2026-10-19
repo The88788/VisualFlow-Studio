@@ -150,6 +150,45 @@
         .card.info .card-value { color: #818cf8; }
         .card.purple .card-value { color: #a78bfa; }
 
+        .stats-overview {
+            margin-bottom: 20px;
+            padding: 10px 14px;
+            border: 1px solid #1e1e2e;
+            border-radius: 14px;
+            background: #101019;
+        }
+
+        .stats-row {
+            display: grid;
+            grid-template-columns: 105px repeat(5, minmax(78px, 1fr));
+            align-items: center;
+            gap: 8px;
+        }
+
+        .stats-row + .stats-row {
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid #1e1e2e;
+        }
+
+        .stats-label { color: #fff; font-size: 13px; font-weight: 650; }
+        .stat-chip {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 7px;
+            min-width: 0;
+            padding: 7px 9px;
+            border-radius: 9px;
+            background: #151521;
+        }
+        .stat-chip span { color: #74748a; font-size: 10px; white-space: nowrap; }
+        .stat-chip strong { color: #fff; font-size: 17px; line-height: 1; }
+        .stat-chip.success strong { color: #4ade80; }
+        .stat-chip.error strong { color: #f87171; }
+        .stat-chip.info strong { color: #818cf8; }
+        .stat-chip.purple strong { color: #a78bfa; }
+
         /* ===== Progress Bar ===== */
         .progress-card {
             background: #12121e;
@@ -1054,6 +1093,41 @@
             background: #09090e;
         }
 
+        .image-result-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+            gap: 8px;
+            padding: 8px;
+            background: #09090e;
+        }
+
+        .image-result-item {
+            min-width: 0;
+            overflow: hidden;
+            border: 1px solid #252538;
+            border-radius: 10px;
+            background: #11111a;
+        }
+
+        .image-result-item > img {
+            display: block;
+            width: 100%;
+            height: 210px;
+            object-fit: cover;
+            cursor: zoom-in;
+        }
+
+        .image-result-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            padding: 8px;
+        }
+
+        .image-result-actions .download-button { flex: 1 1 auto; justify-content: center; }
+        .image-result-actions .error-summary,
+        .image-result-actions .error-details { flex-basis: 100%; }
+
         .image-placeholder {
             display: flex;
             min-height: 180px;
@@ -1328,6 +1402,9 @@
                 grid-template-columns: 1fr 1fr;
             }
             .generate-button { width: 100%; }
+            .stats-row { grid-template-columns: repeat(5, minmax(68px, 1fr)); }
+            .stats-label { grid-column: 1 / -1; }
+            .stat-chip { flex-direction: column; align-items: flex-start; gap: 3px; }
         }
 
         @media (max-width: 480px) {
@@ -1354,47 +1431,25 @@
             </div>
         </header>
 
-        <div class="section-title"><span>Изображения</span></div>
-        <div class="grid">
-            <div class="card">
-                <div class="card-title">Всего заданий</div>
-                <div class="card-value" id="total-images">0</div>
-                <div class="card-subtitle">Заданий за всё время</div>
+        <section class="stats-overview" aria-label="Статистика заданий">
+            <div class="stats-row">
+                <div class="stats-label">Изображения</div>
+                <div class="stat-chip"><span>Всего</span><strong id="total-images">0</strong></div>
+                <div class="stat-chip success"><span>Готово</span><strong id="completed-images">0</strong></div>
+                <div class="stat-chip error"><span>Ошибки</span><strong id="failed-images">0</strong></div>
+                <div class="stat-chip info"><span>В работе</span><strong id="generating-images">0</strong></div>
+                <div class="stat-chip purple"><span>Очередь</span><strong id="pending-images">0</strong></div>
             </div>
-
-            <div class="card success">
-                <div class="card-title">Готово</div>
-                <div class="card-value" id="completed-images">0</div>
-                <div class="card-subtitle">Можно скачать</div>
+            <div class="stats-row">
+                <div class="stats-label">Видео</div>
+                <div class="stat-chip"><span>Всего</span><strong id="total-videos">0</strong></div>
+                <div class="stat-chip success"><span>Готово</span><strong id="completed-videos">0</strong></div>
+                <div class="stat-chip error"><span>Ошибки</span><strong id="failed-videos">0</strong></div>
+                <div class="stat-chip info"><span>В работе</span><strong id="generating-videos">0</strong></div>
+                <div class="stat-chip purple"><span>Очередь</span><strong id="pending-videos">0</strong></div>
             </div>
-
-            <div class="card error">
-                <div class="card-title">Ошибки</div>
-                <div class="card-value" id="failed-images">0</div>
-                <div class="card-subtitle">Не выполнено</div>
-            </div>
-
-            <div class="card info">
-                <div class="card-title">Генерируется</div>
-                <div class="card-value" id="generating-images">0</div>
-                <div class="card-subtitle">В работе</div>
-            </div>
-
-            <div class="card purple">
-                <div class="card-title">Ожидает</div>
-                <div class="card-value" id="pending-images">0</div>
-                <div class="card-subtitle">В очереди</div>
-            </div>
-        </div>
-
-        <div class="section-title"><span>Видео</span></div>
-        <div class="grid">
-            <div class="card"><div class="card-title">Всего видео</div><div class="card-value" id="total-videos">0</div><div class="card-subtitle">За всё время</div></div>
-            <div class="card success"><div class="card-title">Готово</div><div class="card-value" id="completed-videos">0</div><div class="card-subtitle" id="success-subtitle">0% success</div></div>
-            <div class="card error"><div class="card-title">Ошибки</div><div class="card-value" id="failed-videos">0</div><div class="card-subtitle">Не выполнено</div></div>
-            <div class="card info"><div class="card-title">Генерируется</div><div class="card-value" id="generating-videos">0</div><div class="card-subtitle">В работе</div></div>
-            <div class="card purple"><div class="card-title">Ожидает</div><div class="card-value" id="pending-videos">0</div><div class="card-subtitle">В очереди</div></div>
-        </div>
+            <span id="success-subtitle" hidden>0% success</span>
+        </section>
 
         <!-- Stats Cards Row 2 -->
         <div class="grid" id="legacy-account-stats">
@@ -1418,7 +1473,7 @@
         </div>
 
         <!-- Success Rate Bar -->
-        <div class="progress-card">
+        <div class="progress-card" id="legacy-success-rate">
             <span class="progress-label">Success Rate</span>
             <div class="progress-bar">
                 <div class="progress-bar-fill" id="success-bar" style="width: 0%"></div>
@@ -2485,7 +2540,7 @@
             _providerMode = data.provider_mode || 'legacy';
             _providerReady = data.provider_ready !== false;
             const isGflow = _providerMode === 'gflow';
-            ['legacy-account-stats', 'legacy-generation-controls', 'legacy-account-management', 'legacy-accounts-table']
+            ['legacy-account-stats', 'legacy-success-rate', 'legacy-generation-controls', 'legacy-account-management', 'legacy-accounts-table']
                 .forEach(id => {
                     const element = document.getElementById(id);
                     if (element) element.style.display = isGflow ? 'none' : '';
@@ -2640,8 +2695,8 @@
                 imagesList.innerHTML = imageTasks.map(task => {
                     const status = task.status || 'pending';
                     const images = Array.isArray(task.images) ? task.images : [];
-                    const preview = images.length
-                        ? `<div class="image-results ${images.length === 1 ? 'single' : ''}">${images.map((item, idx) => {
+                    const results = images.length
+                        ? `<div class="image-result-list">${images.map((item, idx) => {
                             const lightboxIndex = _resultLightboxItems.push({
                                 url: item.url,
                                 download: item.url,
@@ -2654,17 +2709,12 @@
                                 revision: task.revision || 1,
                                 upscale: item.upscales?.['2k'] || {}
                             }) - 1;
-                            return `<img src="${esc(item.url)}" loading="lazy" alt="Результат ${idx + 1}" onclick="openResultLightbox(${lightboxIndex})">`;
-                        }).join('')}</div>`
-                        : `<div class="image-placeholder">${status === 'failed' ? 'Генерация завершилась ошибкой' : 'Генерация выполняется…'}</div>`;
-                    const downloads = images.length
-                        ? `<div class="image-downloads">${images.map((item, idx) => {
                             const upscale = item.upscales?.['2k'] || {};
                             const originalSize = item.metadata?.width && item.metadata?.height
-                                ? ` (${item.metadata.width}×${item.metadata.height})`
-                                : '';
+                                ? `${item.metadata.width}×${item.metadata.height}`
+                                : 'Оригинал';
                             const upscaleControl = upscale.status === 'completed'
-                                ? `<a class="download-button" href="${esc(upscale.url)}" download>Скачать 2K ${idx + 1}</a>`
+                                ? `<a class="download-button" href="${esc(upscale.url)}" download>Скачать 2K</a>`
                                 : `<button class="download-button" type="button"
                                     ${upscale.status === 'pending' || upscale.status === 'generating' ? 'disabled' : ''}
                                     title="${upscale.status === 'failed' ? esc(upscale.error || '') : 'Flow подготовит файл повышенного разрешения'}"
@@ -2676,14 +2726,19 @@
                             const upscaleError = upscale.status === 'failed' && upscale.error
                                 ? renderError('UPSCALE_FAILED', upscale.error, `upscale:${task.image_id}:${idx}`)
                                 : '';
-                            return `<a class="download-button" href="${esc(item.url)}" download>Скачать оригинал ${idx + 1}${originalSize}</a>
-                                <button class="download-button" type="button" onclick="startRefinement('${esc(task.image_id)}', ${idx})">Доработать</button>
-                                ${upscaleControl}${upscaleError}`;
+                            return `<div class="image-result-item">
+                                <img src="${esc(item.url)}" loading="lazy" alt="Результат ${idx + 1}" onclick="openResultLightbox(${lightboxIndex})">
+                                <div class="image-result-actions">
+                                    <a class="download-button" href="${esc(item.url)}" download>Скачать · ${originalSize}</a>
+                                    <button class="download-button" type="button" onclick="startRefinement('${esc(task.image_id)}', ${idx})">Доработать</button>
+                                    ${upscaleControl}${upscaleError}
+                                </div>
+                            </div>`;
                         }).join('')}</div>`
-                        : '';
+                        : `<div class="image-placeholder">${status === 'failed' ? 'Генерация завершилась ошибкой' : 'Генерация выполняется…'}</div>`;
                     return `
                         <article class="image-task-card">
-                            ${preview}
+                            ${results}
                             <div class="image-task-body">
                                 ${renderPrompt(task.prompt, `image:${task.image_id}`, 'image-task-prompt', 'Без промпта')}
                                 <div class="image-task-meta">
@@ -2696,7 +2751,6 @@
                                 </div>
                                 ${status === 'failed' && task.error_message ? renderError(task.error_code, task.error_message, `image:${task.image_id}`) : ''}
                                 ${status === 'failed' ? `<div class="image-downloads"><button class="download-button" type="button" onclick="retryImage('${esc(task.image_id)}', this)">Повторить</button></div>` : ''}
-                                ${downloads}
                             </div>
                         </article>`;
                 }).join('');
