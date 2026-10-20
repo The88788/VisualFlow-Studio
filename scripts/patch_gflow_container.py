@@ -152,76 +152,29 @@ def main() -> None:
         "reference query safe cleanup",
     )
 
-    # Upstream verifies the requested model and reference ids before allowing
-    # ogiZ0b through, but not the prompt. A stale contenteditable can therefore
-    # submit the previous instruction while the dashboard reports the new one.
-    # Compare the JSON-escaped prompt with the actual request body and abort the
-    # route before Flow acts if it is absent.
+    # Verify the prompt in the editor before submit. The ogiZ0b body does not
+    # preserve image-edit prompts as one contiguous JSON string when mention
+    # chips are present, so checking the raw request body rejects valid i2i
+    # submissions. DOM verification still catches a stale editor before Flow
+    # can spend quota, while upstream continues to verify model + reference ids
+    # in the actual request body.
     composer_source = replace_once(
         composer_source,
-        '''def _image_body_problem(
-    body: str,
-    reference_ids: tuple[str, ...],
-    model: ImageModel | None = None,
-) -> str | None:''',
-        '''def _image_body_problem(
-    body: str,
-    reference_ids: tuple[str, ...],
-    model: ImageModel | None = None,
-    prompt: str | None = None,
-) -> str | None:''',
-        "image submit prompt guard signature",
-    )
-    composer_source = replace_once(
-        composer_source,
-        '''    if model is not None and not any(
-        token in body for token in IMAGE_MODEL_WIRE_TOKENS.get(model, (model.value,))
-    ):''',
-        '''    escaped_prompt = json.dumps(prompt, ensure_ascii=False)[1:-1] if prompt else ""
-    if escaped_prompt and escaped_prompt not in body:
-        return (
-            "migrated host: the image submit body does not carry the requested prompt "
-            "— refusing to run with stale editor text"
-        )
-    if model is not None and not any(
-        token in body for token in IMAGE_MODEL_WIRE_TOKENS.get(model, (model.value,))
-    ):''',
-        "image submit prompt assertion",
-    )
-    composer_source = replace_once(
-        composer_source,
-        '''async def _guard_image_submit(
-    route: Any,
-    request: Any,
-    reference_ids: tuple[str, ...],
-    model: ImageModel | None,
-) -> str | None:''',
-        '''async def _guard_image_submit(
-    route: Any,
-    request: Any,
-    reference_ids: tuple[str, ...],
-    model: ImageModel | None,
-    prompt: str | None,
-) -> str | None:''',
-        "image submit route guard signature",
-    )
-    composer_source = replace_once(
-        composer_source,
-        "    problem = _image_body_problem(_post_data(request), reference_ids, model)",
-        "    problem = _image_body_problem(_post_data(request), reference_ids, model, prompt)",
-        "image submit route prompt check",
-    )
-    composer_source = replace_once(
-        composer_source,
-        "problem = _image_body_problem(_post_data(raw_request), reference_ids, request.model)",
-        "problem = _image_body_problem(\n                _post_data(raw_request), reference_ids, request.model, request.prompt\n            )",
-        "image submit observer prompt check",
-    )
-    composer_source = replace_once(
-        composer_source,
-        "problem = await _guard_image_submit(route, raw_request, reference_ids, request.model)",
-        "problem = await _guard_image_submit(\n                route, raw_request, reference_ids, request.model, request.prompt\n            )",
-        "image submit preflight prompt check",
+        '''        await page.keyboard.insert_text(prompt)
+        log.info("migrated.prompt_typed", chars=len(prompt))''',
+        '''        await page.keyboard.insert_text(prompt)
+        editor_text = await composer.inner_text()
+        normalized_prompt = " ".join(prompt.split())
+        normalized_editor = " ".join(editor_text.split())
+        if normalized_prompt and normalized_prompt not in normalized_editor:
+            raise UiSelectorDriftError(
+                detail=(
+                    "migrated host: the Flow editor does not contain the requested prompt "
+                    "after typing — refusing to submit stale editor text"
+                ),
+            )
+        log.info("migrated.prompt_typed", chars=len(prompt), verified=True)''',
+        "image editor prompt verification",
     )
     composer.write_text(composer_source, encoding="utf-8")
     print("Patched gflow uploads, reference picker, and image-submit verification")

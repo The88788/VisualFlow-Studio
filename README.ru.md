@@ -4,7 +4,7 @@
 
 **Self-hosted пространство для генерации, последовательной доработки, просмотра и скачивания изображений и видео через Google Flow.**
 
-Версия **1.1.2.28** · [English](README.md) · [Развёртывание](DEPLOYMENT.ru.md) · [Участие в разработке](CONTRIBUTING.ru.md)
+Версия **1.1.2.29** · [English](README.md) · [Развёртывание](DEPLOYMENT.ru.md) · [Участие в разработке](CONTRIBUTING.ru.md)
 
 </div>
 
@@ -152,7 +152,7 @@ curl http://127.0.0.1:4000/health
 ```
 
 ```json
-{"status":"ok","service":"VisualFlow Studio","version":"1.1.2.28"}
+{"status":"ok","service":"VisualFlow Studio","version":"1.1.2.29"}
 ```
 
 Production открывает порт только на `127.0.0.1:4000`. Внешний доступ должен

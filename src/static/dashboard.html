@@ -892,6 +892,18 @@
 
         .generate-button:hover:not(:disabled) { filter: brightness(1.1); }
         .generate-button:disabled { opacity: .5; cursor: not-allowed; }
+        .generate-button.is-submitting::before {
+            content: '';
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            margin-right: 9px;
+            vertical-align: -2px;
+            border: 2px solid rgba(255,255,255,.35);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin .7s linear infinite;
+        }
 
         .generation-note {
             margin-top: 11px;
@@ -2044,13 +2056,19 @@
 
             const submit = document.getElementById('generation-submit');
             const last = document.getElementById('generation-last-request');
+            const isImage = _generationKind === 'image';
+            const referenceCount = isImage ? _referenceFiles.length : 0;
             submit.disabled = true;
-            submit.textContent = 'Отправка…';
+            submit.classList.add('is-submitting');
+            submit.textContent = referenceCount
+                ? `Загружаем референсы: ${referenceCount}…`
+                : 'Отправляем задание…';
             last.hidden = false;
             last.className = 'generation-last-request is-pending';
-            last.textContent = 'Отправляем задание на сервер… Текст и референсы пока сохранены в форме.';
+            last.textContent = referenceCount
+                ? `Загружаем ${referenceCount} референс(а) и отправляем задание на сервер. Не закрывайте страницу.`
+                : 'Отправляем задание на сервер. Не закрывайте страницу.';
             try {
-                const isImage = _generationKind === 'image';
                 const refinementRequested = isImage && Boolean(_refinementSource);
                 const body = isImage ? new FormData() : {
                         prompt: promptText,
@@ -2090,6 +2108,7 @@
                     ? (result.data?.image_id || '')
                     : (result.data?.videoId || result.data?.video_id || '');
                 if (isImage) _lastSubmittedImageId = jobId || null;
+                submit.textContent = 'Задание принято — запускаем Flow…';
                 document.getElementById('generation-prompt').value = '';
                 if (isImage) {
                     _referenceFiles.forEach(item => URL.revokeObjectURL(item.url));
@@ -2098,10 +2117,10 @@
                     cancelRefinement();
                 }
                 last.hidden = false;
-                last.className = 'generation-last-request is-success';
+                last.className = 'generation-last-request is-pending';
                 last.textContent = jobId
-                    ? `${refinementRequested ? 'Новая версия' : 'Задание'} ${jobId} принято. Статус обновляется автоматически.`
-                    : 'Задание принято. Статус обновляется автоматически.';
+                    ? `${refinementRequested ? 'Новая версия' : 'Задание'} ${jobId} принято сервером. Запускаем Google Flow…`
+                    : 'Задание принято сервером. Запускаем Google Flow…';
                 showToast(
                     refinementRequested
                         ? 'Новая версия изображения поставлена в очередь'
@@ -2115,6 +2134,7 @@
                 last.textContent = `Задание не подтверждено: ${error.message || 'ошибка сети'}. Текст и референсы сохранены — можно повторить отправку.`;
                 showToast(error.message || 'Ошибка сети', 'error');
             } finally {
+                submit.classList.remove('is-submitting');
                 submit.disabled = !_providerReady;
                 submit.textContent = _generationKind === 'image'
                     ? (_refinementSource ? 'Создать новую версию' : 'Создать изображения')
