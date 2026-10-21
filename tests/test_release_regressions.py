@@ -34,6 +34,15 @@ class ReleaseRegressionTests(unittest.TestCase):
         self.assertIn("Удалить задание", dashboard)
         self.assertIn("method: 'DELETE'", dashboard)
         self.assertIn("Дождитесь завершения генерации", dashboard)
+        self.assertIn("_actionInFlight = true", dashboard)
+        self.assertIn("_lastImageRenderSignature = null", dashboard)
+
+    def test_unchanged_poll_does_not_replace_image_cards(self) -> None:
+        dashboard = (ROOT / "src" / "static" / "dashboard.html").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("imageRenderSignature !== _lastImageRenderSignature", dashboard)
+        self.assertIn("_lastImageRenderSignature = imageRenderSignature", dashboard)
 
     def test_recent_images_are_loaded_ten_at_a_time(self) -> None:
         dashboard = (ROOT / "src" / "static" / "dashboard.html").read_text(

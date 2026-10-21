@@ -1770,6 +1770,7 @@
         let _lightboxItems = [];
         let _lightboxIndex = 0;
         let _lastSubmittedImageId = null;
+        let _lastImageRenderSignature = null;
         const _openErrorDetails = new Set();
         const _technicalErrors = new Map();
         const _openPromptDetails = new Set();
@@ -2193,6 +2194,7 @@
         async function deleteImageTask(imageId, button) {
             if (!confirm('Удалить это задание, все результаты, версии 2K и загруженные референсы с сервера?')) return;
             const original = button.textContent;
+            _actionInFlight = true;
             button.disabled = true;
             button.textContent = 'Удаляем…';
             try {
@@ -2210,11 +2212,15 @@
                     last.textContent = '';
                 }
                 showToast('Задание и его файлы удалены', 'success');
+                _lastImageRenderSignature = null;
+                _actionInFlight = false;
                 await fetchDashboard();
             } catch (error) {
                 showToast(error.message || 'Ошибка сети', 'error');
                 button.disabled = false;
                 button.textContent = original;
+            } finally {
+                _actionInFlight = false;
             }
         }
 
@@ -2752,7 +2758,6 @@
                     last.textContent = `Задание ${_lastSubmittedImageId}: ${labels[submitted.status] || submitted.status}.`;
                 }
             }
-            _resultLightboxItems = [];
             const imagesList = document.getElementById('images-list');
             const imageTotal = Number(data.image_counts?.total || imageTasks.length);
             document.getElementById('images-count').textContent = imageTasks.length < imageTotal
@@ -2763,10 +2768,18 @@
             loadMoreWrap.hidden = !data.recent_images_has_more;
             loadMoreButton.disabled = false;
             loadMoreButton.textContent = 'Загрузить ещё 10';
-            if (imageTasks.length === 0) {
-                imagesList.innerHTML = '<div class="empty-state">Изображений пока нет</div>';
-            } else {
-                imagesList.innerHTML = imageTasks.map(task => {
+            const imageRenderSignature = JSON.stringify({
+                tasks: imageTasks,
+                total: imageTotal,
+                hasMore: Boolean(data.recent_images_has_more)
+            });
+            if (imageRenderSignature !== _lastImageRenderSignature) {
+                _lastImageRenderSignature = imageRenderSignature;
+                _resultLightboxItems = [];
+                if (imageTasks.length === 0) {
+                    imagesList.innerHTML = '<div class="empty-state">Изображений пока нет</div>';
+                } else {
+                    imagesList.innerHTML = imageTasks.map(task => {
                     const status = task.status || 'pending';
                     const images = Array.isArray(task.images) ? task.images : [];
                     const results = images.length
@@ -2832,7 +2845,8 @@
                                 </div>
                             </div>
                         </article>`;
-                }).join('');
+                    }).join('');
+                }
             }
 
             // Videos list
