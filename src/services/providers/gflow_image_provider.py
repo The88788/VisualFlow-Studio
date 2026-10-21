@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import hashlib
 import json
 import mimetypes
 import os
@@ -23,6 +24,15 @@ from .gflow_utils import GFlowProviderError, extract_result_json
 
 IMAGE_MODELS = frozenset(("nano2", "nano-pro", "image4", "imagen4"))
 IMAGE_ASPECTS = frozenset(("9:16", "16:9", "1:1", "4:3", "3:4"))
+
+
+def _sha256_file(path: Path) -> str:
+    """Return a content identity so duplicate CLI result rows are saved once."""
+    digest = hashlib.sha256()
+    with path.open("rb") as source:
+        for chunk in iter(lambda: source.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
 
 
 class GFlowImageProvider:
@@ -149,7 +159,9 @@ class GFlowImageProvider:
 
         stored: list[str] = []
         metadata: list[dict[str, Any]] = []
-        for index, item in enumerate(images):
+        seen_media_names: set[str] = set()
+        seen_hashes: set[str] = set()
+        for item in images:
             if not isinstance(item, dict):
                 continue
             local_path = Path(str(item.get("local_path") or ""))
@@ -157,16 +169,33 @@ class GFlowImageProvider:
                 raise GFlowProviderError(
                     "GENERATION_FAILED", f"Generated image file is missing: {local_path}"
                 )
-            storage_key = f"images/{image_id}/{index + 1}.png"
+            media_name = str(item.get("media_name") or "").strip()
+            content_hash = await asyncio.to_thread(_sha256_file, local_path)
+            if (
+                (media_name and media_name in seen_media_names)
+                or content_hash in seen_hashes
+            ):
+                logger.warning(
+                    "[GFlowImageProvider] Ignored duplicate result image=%s media=%s",
+                    image_id,
+                    media_name or "<missing>",
+                )
+                continue
+            if media_name:
+                seen_media_names.add(media_name)
+            seen_hashes.add(content_hash)
+            result_index = len(stored)
+            storage_key = f"images/{image_id}/{result_index + 1}.png"
             await storage.upload_file(storage_key, local_path, content_type="image/png")
             stored.append(storage_key)
             dimensions = item.get("dimensions") if isinstance(item.get("dimensions"), dict) else {}
             metadata.append(
                 {
-                    "index": index,
-                    "media_name": item.get("media_name"),
+                    "index": result_index,
+                    "media_name": media_name or None,
                     "workflow_id": item.get("workflow_id"),
                     "seed": item.get("seed"),
+                    "sha256": content_hash,
                     "width": dimensions.get("width"),
                     "height": dimensions.get("height"),
                     "file_size": local_path.stat().st_size,

@@ -76,6 +76,17 @@ class ReleaseRegressionTests(unittest.TestCase):
         self.assertIn("VideoDB(**dict(row))", database)
         self.assertIn("Video cleanup failed; continuing with images", main)
 
+    def test_duplicate_image_results_are_filtered_at_save_and_response(self) -> None:
+        provider = (
+            ROOT / "src" / "services" / "providers" / "gflow_image_provider.py"
+        ).read_text(encoding="utf-8")
+        routes = (ROOT / "src" / "api" / "routes.py").read_text(encoding="utf-8")
+        self.assertIn("seen_media_names", provider)
+        self.assertIn("seen_hashes", provider)
+        self.assertIn("Ignored duplicate result", provider)
+        self.assertIn("seen_storage_keys", routes)
+        self.assertIn("content_hash in seen_hashes", routes)
+
 
 if __name__ == "__main__":
     unittest.main()

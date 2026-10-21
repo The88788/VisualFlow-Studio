@@ -751,8 +751,11 @@ def build_image_response(task: dict) -> dict:
         metadata = []
 
     images = []
+    seen_storage_keys: set[str] = set()
+    seen_media_names: set[str] = set()
+    seen_hashes: set[str] = set()
     if isinstance(result_files, list):
-        for index, _storage_key in enumerate(result_files):
+        for index, raw_storage_key in enumerate(result_files):
             item_metadata = (
                 metadata[index]
                 if isinstance(metadata, list)
@@ -760,6 +763,20 @@ def build_image_response(task: dict) -> dict:
                 and isinstance(metadata[index], dict)
                 else {}
             )
+            storage_key = str(raw_storage_key)
+            media_name = str(item_metadata.get("media_name") or "").strip()
+            content_hash = str(item_metadata.get("sha256") or "").strip()
+            if (
+                storage_key in seen_storage_keys
+                or (media_name and media_name in seen_media_names)
+                or (content_hash and content_hash in seen_hashes)
+            ):
+                continue
+            seen_storage_keys.add(storage_key)
+            if media_name:
+                seen_media_names.add(media_name)
+            if content_hash:
+                seen_hashes.add(content_hash)
             upscale_data = item_metadata.get("upscales", {})
             public_upscales = {}
             if isinstance(upscale_data, dict):
@@ -792,7 +809,11 @@ def build_image_response(task: dict) -> dict:
         "prompt": task.get("prompt"),
         "model": task.get("model"),
         "aspect": task.get("aspect_ratio"),
-        "count": task.get("requested_count", 1),
+        "count": (
+            len(images)
+            if task.get("status") == "completed"
+            else task.get("requested_count", 1)
+        ),
         "status": task.get("status", "pending"),
         "progress": task.get("progress", 0),
         "error_code": task.get("error_code"),
