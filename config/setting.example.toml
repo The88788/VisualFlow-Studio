@@ -38,7 +38,7 @@ timeout = 1200
 # through the process environment only.
 
 [cleanup]
-max_age_days = 1
+max_age_days = 60
 tmp_max_hours = 6
 log_max_mb = 50
 

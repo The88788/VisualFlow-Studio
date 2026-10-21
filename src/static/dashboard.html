@@ -1736,6 +1736,9 @@
         <div class="image-gallery" id="images-list">
             <div class="empty-state">Загрузка…</div>
         </div>
+        <div class="image-downloads" id="images-load-more-wrap" hidden>
+            <button class="download-button" id="images-load-more" type="button" onclick="loadMoreImages()">Загрузить ещё 10</button>
+        </div>
 
         <!-- Recent Videos -->
         <div class="section-title">
@@ -2187,6 +2190,34 @@
             }
         }
 
+        async function deleteImageTask(imageId, button) {
+            if (!confirm('Удалить это задание, все результаты, версии 2K и загруженные референсы с сервера?')) return;
+            const original = button.textContent;
+            button.disabled = true;
+            button.textContent = 'Удаляем…';
+            try {
+                const response = await fetch(`/api/images/${encodeURIComponent(imageId)}`, {
+                    method: 'DELETE'
+                });
+                const result = await response.json();
+                if (!response.ok || !result.success) {
+                    throw new Error(result.error?.message || result.message || 'Не удалось удалить задание');
+                }
+                if (_lastSubmittedImageId === imageId) {
+                    _lastSubmittedImageId = null;
+                    const last = document.getElementById('generation-last-request');
+                    last.hidden = true;
+                    last.textContent = '';
+                }
+                showToast('Задание и его файлы удалены', 'success');
+                await fetchDashboard();
+            } catch (error) {
+                showToast(error.message || 'Ошибка сети', 'error');
+                button.disabled = false;
+                button.textContent = original;
+            }
+        }
+
         // ===== Relaxed Mode Toggle =====
         let _relaxedEnabled = true;
 
@@ -2541,10 +2572,25 @@
         }
 
         // ===== Main Fetch =====
+        let _imageDisplayLimit = 10;
+
+        async function loadMoreImages() {
+            const button = document.getElementById('images-load-more');
+            button.disabled = true;
+            button.textContent = 'Загрузка…';
+            _imageDisplayLimit += 10;
+            try {
+                await fetchDashboard();
+            } finally {
+                button.disabled = false;
+                button.textContent = 'Загрузить ещё 10';
+            }
+        }
+
         async function fetchDashboard() {
             if (_actionInFlight) return; // don't overwrite DOM while action is running
             try {
-                const res = await fetch('/api/dashboard/data');
+                const res = await fetch(`/api/dashboard/data?image_limit=${_imageDisplayLimit}`);
                 const data = await res.json();
                 updateUI(data);
                 document.getElementById('service-status').textContent = '● Online';
@@ -2708,7 +2754,15 @@
             }
             _resultLightboxItems = [];
             const imagesList = document.getElementById('images-list');
-            document.getElementById('images-count').textContent = `(${imageTasks.length})`;
+            const imageTotal = Number(data.image_counts?.total || imageTasks.length);
+            document.getElementById('images-count').textContent = imageTasks.length < imageTotal
+                ? `(${imageTasks.length} из ${imageTotal})`
+                : `(${imageTotal})`;
+            const loadMoreWrap = document.getElementById('images-load-more-wrap');
+            const loadMoreButton = document.getElementById('images-load-more');
+            loadMoreWrap.hidden = !data.recent_images_has_more;
+            loadMoreButton.disabled = false;
+            loadMoreButton.textContent = 'Загрузить ещё 10';
             if (imageTasks.length === 0) {
                 imagesList.innerHTML = '<div class="empty-state">Изображений пока нет</div>';
             } else {
@@ -2770,7 +2824,12 @@
                                     <span>${task.created_at ? formatDate(task.created_at) : '—'}</span>
                                 </div>
                                 ${status === 'failed' && task.error_message ? renderError(task.error_code, task.error_message, `image:${task.image_id}`) : ''}
-                                ${status === 'failed' ? `<div class="image-downloads"><button class="download-button" type="button" onclick="retryImage('${esc(task.image_id)}', this)">Повторить</button></div>` : ''}
+                                <div class="image-downloads">
+                                    ${status === 'failed' ? `<button class="download-button" type="button" onclick="retryImage('${esc(task.image_id)}', this)">Повторить</button>` : ''}
+                                    <button class="download-button delete-image-button" type="button"
+                                        ${status === 'pending' || status === 'generating' ? 'disabled title="Дождитесь завершения генерации"' : ''}
+                                        onclick="deleteImageTask('${esc(task.image_id)}', this)">Удалить задание</button>
+                                </div>
                             </div>
                         </article>`;
                 }).join('');

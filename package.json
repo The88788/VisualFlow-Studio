@@ -1,6 +1,6 @@
 {
   "name": "visualflow-studio",
-  "version": "1.1.2-29",
+  "version": "1.1.2-31",
   "description": "Browser automation dependencies for VisualFlow Studio",
   "private": true,
   "license": "MIT",

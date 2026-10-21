@@ -866,9 +866,11 @@ async def get_service_status():
 
 
 @router.get("/dashboard/data")
-async def get_dashboard_data():
+async def get_dashboard_data(image_limit: int = 10):
     """Get all dashboard data in a single request."""
     import os
+
+    image_limit = max(10, min(image_limit, 1000))
 
     accounts = await db.get_all_accounts()
     all_stats = await db.get_all_account_stats()
@@ -982,7 +984,7 @@ async def get_dashboard_data():
 
     recent_images = [
         build_image_response(task)
-        for task in await db.get_image_tasks(limit=25)
+        for task in await db.get_image_tasks(limit=image_limit)
     ]
 
     # Overall stats
@@ -1015,6 +1017,8 @@ async def get_dashboard_data():
         "total_accounts": len(accounts),
         "recent_videos": videos_data,
         "recent_images": recent_images,
+        "recent_images_limit": image_limit,
+        "recent_images_has_more": image_counts.get("total", 0) > len(recent_images),
         "memory_mb": memory_mb,
         "uptime": uptime_str,
         "uptime_seconds": uptime_seconds,

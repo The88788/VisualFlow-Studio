@@ -4,7 +4,7 @@
 
 **A self-hosted workspace for generating, refining, reviewing, and downloading AI images and videos through Google Flow.**
 
-Version **1.1.2.29** · [Русская версия](README.ru.md) · [Deployment](DEPLOYMENT.md) · [Contributing](CONTRIBUTING.md)
+Version **1.1.2.31** · [Русская версия](README.ru.md) · [Deployment](DEPLOYMENT.md) · [Contributing](CONTRIBUTING.md)
 
 </div>
 
@@ -153,7 +153,7 @@ curl http://127.0.0.1:4000/health
 ```
 
 ```json
-{"status":"ok","service":"VisualFlow Studio","version":"1.1.2.29"}
+{"status":"ok","service":"VisualFlow Studio","version":"1.1.2.31"}
 ```
 
 Production binds only to `127.0.0.1:4000`. Publish it through an authenticated
@@ -169,7 +169,7 @@ HTTPS reverse proxy. See [DEPLOYMENT.md](DEPLOYMENT.md).
 | `gflow` | `profile` | gflow profile name |
 | `gflow` | `project_id` | Existing Flow project |
 | `gflow` | `timeout` | Provider command timeout |
-| `cleanup` | `max_age_days` | Result retention |
+| `cleanup` | `max_age_days` | Result retention (default: 60 days) |
 | `cleanup` | `tmp_max_hours` | Temporary-file retention |
 | `ip_whitelist` | `enabled`, `ips` | Optional application IP restriction |
 

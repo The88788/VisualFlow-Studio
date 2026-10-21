@@ -339,7 +339,7 @@ class Config:
 
     @property
     def cleanup_max_age_days(self) -> int:
-        return self.get("cleanup", "max_age_days", 1)  # Default 1 day for low disk
+        return self.get("cleanup", "max_age_days", 60)
 
     @property
     def cleanup_tmp_max_hours(self) -> int:

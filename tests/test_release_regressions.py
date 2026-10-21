@@ -26,6 +26,36 @@ class ReleaseRegressionTests(unittest.TestCase):
         self.assertIn("Задание принято — запускаем Flow", dashboard)
         self.assertIn("submit.classList.remove('is-submitting')", dashboard)
 
+    def test_recent_image_task_has_whole_task_delete_action(self) -> None:
+        dashboard = (ROOT / "src" / "static" / "dashboard.html").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("async function deleteImageTask(imageId, button)", dashboard)
+        self.assertIn("Удалить задание", dashboard)
+        self.assertIn("method: 'DELETE'", dashboard)
+        self.assertIn("Дождитесь завершения генерации", dashboard)
+
+    def test_recent_images_are_loaded_ten_at_a_time(self) -> None:
+        dashboard = (ROOT / "src" / "static" / "dashboard.html").read_text(
+            encoding="utf-8"
+        )
+        routes = (ROOT / "src" / "api" / "routes.py").read_text(encoding="utf-8")
+        self.assertIn("let _imageDisplayLimit = 10", dashboard)
+        self.assertIn("_imageDisplayLimit += 10", dashboard)
+        self.assertIn("Загрузить ещё 10", dashboard)
+        self.assertIn("async def get_dashboard_data(image_limit: int = 10)", routes)
+        self.assertIn('"recent_images_has_more"', routes)
+
+    def test_default_result_retention_is_sixty_days(self) -> None:
+        config_source = (ROOT / "src" / "core" / "config.py").read_text(
+            encoding="utf-8"
+        )
+        example = (ROOT / "config" / "setting.example.toml").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn('self.get("cleanup", "max_age_days", 60)', config_source)
+        self.assertIn("max_age_days = 60", example)
+
 
 if __name__ == "__main__":
     unittest.main()
