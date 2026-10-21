@@ -56,6 +56,15 @@ class ReleaseRegressionTests(unittest.TestCase):
         self.assertIn('self.get("cleanup", "max_age_days", 60)', config_source)
         self.assertIn("max_age_days = 60", example)
 
+    def test_video_cleanup_uses_supported_model_conversion(self) -> None:
+        database = (ROOT / "src" / "core" / "database.py").read_text(
+            encoding="utf-8"
+        )
+        main = (ROOT / "src" / "main.py").read_text(encoding="utf-8")
+        self.assertNotIn("VideoDB.from_row", database)
+        self.assertIn("VideoDB(**dict(row))", database)
+        self.assertIn("Video cleanup failed; continuing with images", main)
+
 
 if __name__ == "__main__":
     unittest.main()

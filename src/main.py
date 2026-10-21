@@ -188,23 +188,27 @@ async def cleanup_old_data():
         try:
             # Clean storage artifacts before DB deletion
             max_age = config.cleanup_max_age_days
-            old_videos = await db.get_old_videos(max_age)
-            for v in old_videos:
-                try:
-                    await storage.delete_prefix(f"images/{v.video_id}")
-                except Exception as e:
-                    logger.debug(f"Error cleaning images for {v.video_id}: {e}")
-                # Delete trimmed/merged video files from storage
-                if v.download_url and not v.download_url.startswith("http"):
+            try:
+                old_videos = await db.get_old_videos(max_age)
+                for v in old_videos:
                     try:
-                        await storage.delete(f"videos/{v.download_url}")
+                        await storage.delete_prefix(f"images/{v.video_id}")
                     except Exception as e:
-                        logger.debug(f"Error cleaning video file for {v.video_id}: {e}")
+                        logger.debug(f"Error cleaning images for {v.video_id}: {e}")
+                    # Delete trimmed/merged video files from storage
+                    if v.download_url and not v.download_url.startswith("http"):
+                        try:
+                            await storage.delete(f"videos/{v.download_url}")
+                        except Exception as e:
+                            logger.debug(f"Error cleaning video file for {v.video_id}: {e}")
 
-            # Cleanup old videos from DB
-            deleted = await db.cleanup_old_videos(max_age)
-            if deleted > 0:
-                logger.info(f"Cleaned up {deleted} old videos")
+                # Cleanup old videos from DB
+                deleted = await db.cleanup_old_videos(max_age)
+                if deleted > 0:
+                    logger.info(f"Cleaned up {deleted} old videos")
+            except Exception as e:
+                # Video cleanup must never prevent image retention from running.
+                logger.warning(f"Video cleanup failed; continuing with images: {e}")
 
             # Image results use the same retention period as videos. Remove
             # storage first and delete the dashboard row only after storage

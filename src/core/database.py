@@ -1132,7 +1132,7 @@ class Database:
             """,
             (max_age_days,),
         )
-        return [VideoDB.from_row(dict(row)) for row in rows]
+        return [VideoDB(**dict(row)) for row in rows]
 
     async def cleanup_old_videos(self, max_age_days: int) -> int:
         """Delete videos older than max_age_days."""
