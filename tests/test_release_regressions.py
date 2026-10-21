@@ -36,6 +36,8 @@ class ReleaseRegressionTests(unittest.TestCase):
         self.assertIn("Дождитесь завершения генерации", dashboard)
         self.assertIn("_actionInFlight = true", dashboard)
         self.assertIn("_lastImageRenderSignature = null", dashboard)
+        self.assertIn("button.dataset.confirmDelete", dashboard)
+        self.assertIn("Нажмите ещё раз для удаления", dashboard)
 
     def test_unchanged_poll_does_not_replace_image_cards(self) -> None:
         dashboard = (ROOT / "src" / "static" / "dashboard.html").read_text(

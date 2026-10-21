@@ -2192,8 +2192,20 @@
         }
 
         async function deleteImageTask(imageId, button) {
-            if (!confirm('Удалить это задание, все результаты, версии 2K и загруженные референсы с сервера?')) return;
-            const original = button.textContent;
+            if (button.dataset.confirmDelete !== 'yes') {
+                button.dataset.confirmDelete = 'yes';
+                button.textContent = 'Нажмите ещё раз для удаления';
+                showToast('Повторное нажатие удалит задание и все его файлы', 'info');
+                window.setTimeout(() => {
+                    if (button.isConnected && button.dataset.confirmDelete === 'yes') {
+                        delete button.dataset.confirmDelete;
+                        button.textContent = 'Удалить задание';
+                    }
+                }, 6000);
+                return;
+            }
+            delete button.dataset.confirmDelete;
+            const original = 'Удалить задание';
             _actionInFlight = true;
             button.disabled = true;
             button.textContent = 'Удаляем…';

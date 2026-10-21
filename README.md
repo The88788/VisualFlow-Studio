@@ -4,7 +4,7 @@
 
 **A self-hosted workspace for generating, refining, reviewing, and downloading AI images and videos through Google Flow.**
 
-Version **1.1.2.33** · [Русская версия](README.ru.md) · [Deployment](DEPLOYMENT.md) · [Contributing](CONTRIBUTING.md)
+Version **1.1.2.34** · [Русская версия](README.ru.md) · [Deployment](DEPLOYMENT.md) · [Contributing](CONTRIBUTING.md)
 
 </div>
 
@@ -153,7 +153,7 @@ curl http://127.0.0.1:4000/health
 ```
 
 ```json
-{"status":"ok","service":"VisualFlow Studio","version":"1.1.2.33"}
+{"status":"ok","service":"VisualFlow Studio","version":"1.1.2.34"}
 ```
 
 Production binds only to `127.0.0.1:4000`. Publish it through an authenticated
