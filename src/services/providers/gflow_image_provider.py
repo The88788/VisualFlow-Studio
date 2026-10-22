@@ -63,6 +63,10 @@ class GFlowImageProvider:
             # request without asking the designer to upload everything again.
             if completed:
                 await storage.delete_prefix(f"references/{image_id}")
+            # Generated downloads and local copies of references are working
+            # files only. Persistent originals/upscales live under images/ and
+            # failed-job references live under references/ for exact retry.
+            shutil.rmtree(TMP_DIR / "gflow_images" / image_id, ignore_errors=True)
 
     async def _run(self, task: dict[str, Any]) -> None:
         image_id = str(task["image_id"])
@@ -70,6 +74,9 @@ class GFlowImageProvider:
             Path(app_config.gflow_home) / f"profile_{app_config.gflow_profile}"
         )
         output_dir = TMP_DIR / "gflow_images" / image_id
+        # A previous interrupted process must not leak stale downloads into a
+        # retry that owns the same task id.
+        shutil.rmtree(output_dir, ignore_errors=True)
         output_dir.mkdir(parents=True, exist_ok=True)
         try:
             reference_keys = json.loads(task.get("reference_files") or "[]")

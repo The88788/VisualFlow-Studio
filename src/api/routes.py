@@ -19,6 +19,7 @@ from ..core.errors import ApiError, ErrorCode
 from ..core.logger import logger
 from ..core.models import VideoDB, VideoStatus
 from ..services.ffmpeg_service import ffmpeg_service, FFmpegError
+from ..services.image_cleanup import delete_image_artifacts
 from ..services.storage import storage
 from ..services.video_handler import VideoHandler
 from ..services.token_manager import TokenManager
@@ -1406,10 +1407,38 @@ async def delete_image(image_id: str):
             message="Нельзя удалить изображение во время генерации",
             status_code=409,
         )
-    await storage.delete_prefix(f"images/{image_id}")
-    await storage.delete_prefix(f"references/{image_id}")
-    await db.delete_image_task(image_id)
-    return ApiResponse(success=True, message="Изображение удалено")
+    try:
+        metadata = json.loads(task.get("result_metadata") or "[]")
+    except (json.JSONDecodeError, TypeError):
+        metadata = []
+    upscale_active = any(
+        isinstance(item, dict)
+        and any(
+            isinstance(state, dict) and state.get("status") in ("pending", "generating")
+            for state in item.get("upscales", {}).values()
+        )
+        for item in metadata
+        if isinstance(metadata, list)
+    )
+    if upscale_active:
+        raise ApiError(
+            code=ErrorCode.VALIDATION_IMAGE_NOT_READY,
+            message="Нельзя удалить задание во время подготовки 2K",
+            status_code=409,
+        )
+
+    removed = await delete_image_artifacts(image_id)
+    deleted_rows = await db.delete_image_task(image_id)
+    if deleted_rows != 1:
+        raise RuntimeError(f"Image task disappeared during deletion: {image_id}")
+    logger.info(
+        "Deleted image task %s: results=%d references=%d temporary=%d",
+        image_id,
+        removed.result_files,
+        removed.reference_files,
+        removed.temporary_files,
+    )
+    return ApiResponse(success=True, message="Задание и все его файлы удалены")
 
 
 @router.get("/images")

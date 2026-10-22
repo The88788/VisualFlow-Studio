@@ -28,6 +28,7 @@ from .core.errors import ApiError
 from .core.logger import logger
 from .services.capsolver import get_capsolver
 from .services.ffmpeg_service import ffmpeg_service
+from .services.image_cleanup import delete_image_artifacts
 from .services.token_manager import TokenManager
 from .services.storage import storage, LocalStorage
 from .services.video_handler import VideoHandler
@@ -218,8 +219,24 @@ async def cleanup_old_data():
             for task in old_image_tasks:
                 image_id = str(task["image_id"])
                 try:
-                    await storage.delete_prefix(f"images/{image_id}")
-                    await storage.delete_prefix(f"references/{image_id}")
+                    metadata = json.loads(task.get("result_metadata") or "[]")
+                except (json.JSONDecodeError, TypeError):
+                    metadata = []
+                if isinstance(metadata, list) and any(
+                    isinstance(item, dict)
+                    and any(
+                        isinstance(state, dict)
+                        and state.get("status") in ("pending", "generating")
+                        for state in item.get("upscales", {}).values()
+                    )
+                    for item in metadata
+                ):
+                    logger.info(
+                        f"Keeping old image task {image_id}: 2K preparation is active"
+                    )
+                    continue
+                try:
+                    await delete_image_artifacts(image_id)
                 except Exception as e:
                     logger.warning(
                         f"Could not clean stored images for {image_id}; "
@@ -262,7 +279,7 @@ async def cleanup_old_data():
                     if files_exist:
                         continue
                     image_id = str(task["image_id"])
-                    await storage.delete_prefix(f"images/{image_id}")
+                    await delete_image_artifacts(image_id)
                     await db.delete_image_task(image_id)
                     logger.info(f"Removed image task with missing files: {image_id}")
 

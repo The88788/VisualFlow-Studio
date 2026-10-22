@@ -87,6 +87,27 @@ class ReleaseRegressionTests(unittest.TestCase):
         self.assertIn("seen_storage_keys", routes)
         self.assertIn("content_hash in seen_hashes", routes)
 
+    def test_image_task_deletion_removes_every_owned_artifact_before_database_row(self) -> None:
+        cleanup = (ROOT / "src" / "services" / "image_cleanup.py").read_text(
+            encoding="utf-8"
+        )
+        routes = (ROOT / "src" / "api" / "routes.py").read_text(encoding="utf-8")
+        provider = (
+            ROOT / "src" / "services" / "providers" / "gflow_image_provider.py"
+        ).read_text(encoding="utf-8")
+        self.assertIn('delete_prefix(f"images/{image_id}")', cleanup)
+        self.assertIn('delete_prefix(f"references/{image_id}")', cleanup)
+        self.assertIn('TMP_DIR / "gflow_images" / image_id', cleanup)
+        self.assertLess(
+            routes.index("removed = await delete_image_artifacts(image_id)"),
+            routes.index("deleted_rows = await db.delete_image_task(image_id)"),
+        )
+        self.assertIn("Нельзя удалить задание во время подготовки 2K", routes)
+        self.assertIn(
+            'shutil.rmtree(TMP_DIR / "gflow_images" / image_id, ignore_errors=True)',
+            provider,
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
